@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+  <title>NM Game</title>
+  <meta name="description" content="Turn-based js game" />
+  <meta name="keywords" content="game, turn-based, js" />
+
+  <link rel="stylesheet" type="text/css" media="screen" href="css/style.css" />
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css"
+    integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+</head>
+
+<body>
+  <main id="main-container">
+    <header id="main-header">
+      <!--
+      <h1>Super Robot Wars Alpha IV</h1>
+      -->
+      <img src ="assets/banner.png">
+      <p>Apple0032 Production</p>
+    </header>
+    <button id="newGameBtn">Start Game</button>
+    <button id="loadGameBtn">Load Game</button>
+
+    <div id="game-container">
+      <div class="stats-window" id="statboxPlayerOne>">
+        <h1 style="color:rgb(27, 161, 0)">PLAYER ONE</h1>
+        <p id="statboxOne">
+          <div class="btnBox">
+            <button class="attackBtn">Attack!</button>
+            <button class="defendBtn">Defend!</button>
+          </div>
+        </p>
+
+      </div>
+      <div class="container" id="mapGrid"></div>
+      <div class="stats-window" id="statboxPlayerTwo>">
+        <h1 style="color:#b10032">PLAYER TWO</h1>
+        <p id="statboxTwo">
+          <div class="btnBox">
+            <button class="attackBtn">Attack!</button>
+            <button class="defendBtn">Defend!</button>
+          </div>
+        </p>
+      </div>
+    </div>
+
+  </main>
+
+  <section id="gameInfo">
+    <div id="instruction">
+      <ol>
+        <h4>How to play?</h4>
+        <li>NEW GAME button will generate new map grid with Players stat boxes</li>
+        <li>To navigate through map grid, use right mouse click</li>
+        <li>Boxes on which Penguin can relocate are highlighted </li>
+        <li>When Penguin enters box with a weapon, it is picked up and old weapon is left on its place</li>
+        <li>When Penguins enter boxes directly next to each other, battle begins</li>
+        <li>If active Penguin attacks - it induces damage on opponents health points according to weapon's damage value
+        </li>
+        <li>If active Penguin defends - damage induced by opponent in next turn will be divided by half</li>
+        <li>When any Penguin's healthpoints drop to 0, battle ends and game is over</li>
+      </ol>
+    </div>
+    <table id="damageInfo">
+      <tr>
+        <th colspan="3">Weapon damage info:</th>
+      </tr>
+      <tr>
+        <td>snowball</td>
+        <td>
+          <div class="snowball weaponIcon"></div>
+        </td>
+        <td>10</td>
+      </tr>
+      <tr>
+        <td>fish</td>
+        <td>
+          <div class="fish weaponIcon"></div>
+        </td>
+        <td>15</td>
+      </tr>
+      <tr>
+        <td>small stone</td>
+        <td>
+          <div class="smallStone weaponIcon"></div>
+        </td>
+        <td>20</td>
+      </tr>
+      <tr>
+        <td>big stone</td>
+        <td>
+          <div class="bigStone weaponIcon"></div>
+        </td>
+        <td>30</td>
+      </tr>
+    </table>
+  </section>
+
+  <footer>
+
+    <div id="footer-notes">
+      <p>
+        <a href="https://github.com/NatMi/JS-Board-Game-JQuery" target="blank">
+          <i class="fab fa-github"></i> View this project on GitHub
+        </a>
+      </p>
+      <br>
+      <h3>Get in touch:</h3>
+      <p><i class="fa fa-envelope"></i> nat.mietus@gmail.com</p>
+      <p>
+        <a href="https://www.linkedin.com/in/natalia-mietus-24264a17b/" target="blank">
+          <i class="fab fa-linkedin"></i> Go to my LinkedIn account
+        </a>
+      </p>
+      <br>
+      <p id="copyrights">Created by Natalia Miętus &copy;2019 as part of <a
+          href="https://openclassrooms.com/en/paths/61-front-end-developer" target="blank">OpenClassrooms Front-End
+          Developer bachelors level diploma</a></p>
+      <div id="credits">
+        <p>
+          <strong>Image credits:</strong>
+          Background: <a
+            href="https://stock.adobe.com/uk/images/cartoon-realistic-nature-winter-arctic-ice-landscape-with-iceberg-and-snow-mountains-hills/133336574">
+            ©lembergvector</a>
+          Penguins: <a
+            href="https://stock.adobe.com/uk/images/isolated-penguin-cartoon-flat-style-in-action-set/111855550">
+            ©maximguzanov </a>
+          Dimmed squares: <a
+            href="https://stock.adobe.com/uk/images/triangle-pattern-set-frosty-morning-vector-seamless-geometric-backgrounds/168250068">
+            ©Olga </a>
+          Fish: <a href="https://stock.adobe.com/uk/images/cartoon-fishes-set-isolated-design-elements/170833938">
+            ©lattesmile </a>
+          Stone: <a href="https://stock.adobe.com/uk/images/rocks-and-stones-cartoon-set/197651885">
+            ©artemkryzhnyi </a>
+          Snowball: <a href="https://stock.adobe.com/uk/images/nature-snow-game-background/222700692">
+            ©mikailain </a></p>
+      </div>
+    </div>
+
+  </footer>
+
+  <audio src="bgm/timetocome.MP3" autoplay>
+    <p>If you are reading this, it is because your browser does not support the audio element.</p>
+  </audio>
+
+  <script src="https://code.jquery.com/jquery-3.4.1.min.js"
+    integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+  <script src="js/map.js"></script>
+
+</body>
+
+</html>

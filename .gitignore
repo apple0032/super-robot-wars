@@ -1,0 +1,7 @@
+/vendor
+/node_modules
+storage/
+.DS_Store
+/tests
+.idea
+.htaccess
