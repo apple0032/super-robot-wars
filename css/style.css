@@ -21,7 +21,7 @@ body {
 }
 #newGameBtn, #loadGameBtn {
   display: inline-block;
-  padding: 1em;
+  padding: 6px 40px;
   margin: 0px auto 20px auto;
   border: none;
   border-radius: 2em;
@@ -33,9 +33,13 @@ body {
   text-transform: uppercase;
   transition: all 0.2s;
 }
-#newGameBtn:hover {
+#newGameBtn:hover, #loadGameBtn:hover {
   background-color: #4095c6;
 }
+#newGameBtn:focus, #loadGameBtn:focus {
+  outline: none !important;
+}
+
 .attackBtn {
   display: inline-block;
   padding: 1em;
@@ -95,9 +99,13 @@ body {
 }
 
 #main-header {
-  margin: 1rem 0rem;
+  margin: 3rem 0rem;
   font-family: "Cinzel Decorative";
   text-align: center;
+}
+
+#main-header img{
+  width:35%;
 }
 #main-header h1 {
   font-size: 2rem;
@@ -105,6 +113,8 @@ body {
 }
 #main-header p {
   color: #eeeeee;
+  font-family: 'Noto Serif JP', serif;
+  font-size: 25px;
 }
 #main-header a {
   text-decoration: none;
