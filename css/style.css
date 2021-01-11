@@ -308,3 +308,64 @@ th,
     padding: 0.5em;
   }
 }
+
+
+#map{
+  text-align: center;
+  margin: 0 auto;
+}
+
+.mapbox {
+  width: 40px;
+  height: 40px;
+  display: inline-block;
+  border: 1px solid;
+  vertical-align: top;
+}
+
+.mapbox img{
+  width: 36px;
+  height: 36px;
+}
+
+.map-row {
+  height: 40px;
+}
+
+.box-is-player, .box-is-ai{
+  cursor: pointer;
+}
+
+.available_move{
+  background-color: #5E8BEB !important;
+  cursor: pointer;
+}
+
+
+
+
+
+.developer-coordinate{
+  font-weight: bold;
+  color: black;
+}
+
+.developer-tool{
+  width: 100%;
+  margin: 0 auto;
+  position: fixed;
+  bottom: 10px;
+  right: -10px;
+  z-index: 2;
+}
+
+#developer-btn{
+  padding: 1px 5px;
+  font-size: 10px;
+  border: none;
+  opacity: 0.05;
+}
+
+.developer-coordinate{
+  display:none;
+}
