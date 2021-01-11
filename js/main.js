@@ -58,42 +58,48 @@ function placeRobot(){
             var robotPos = "data-box-"+value2.x+"-"+value2.y;
             if(key === "ai"){
                 $("."+robotPos).css({"border":"2px solid red"});
-                $("."+robotPos).html("<img src='./assets/robot"+value2.robotID+".png'>");
+                $("."+robotPos).append("<img src='./assets/robot"+value2.robotID+".png'>");
                 $("."+robotPos).addClass("box-is-ai");
             } else {
                 $("."+robotPos).css({"border":"2px solid blue"});
-                $("."+robotPos).html("<img src='./assets/robot"+value2.robotID+".png' data-robot='"+key2+"'>");
+                $("."+robotPos).append("<img src='./assets/robot"+value2.robotID+".png' data-robot='"+key2+"'>");
                 $("."+robotPos).addClass("box-is-player");
             }
                 $("."+robotPos).css("background-size","cover");
         });
     });
 
-    $('.box-is-player').click(function() {
-        if(focusRobot != null) {
-            focusRobot.css({"border":"2px solid blue"});
-            if(getRobotID($(this)) !== getRobotID(focusRobot)){
-                $(".mapbox").removeClass("available_move");
-            }
-        }
-        focusRobot = $(this);
+    clickBoxPlayerListener();
 
-        //var robotID = focusRobot.find('img').attr('data-robot');
-        action($(this));
+}
+
+function clickBoxPlayerListener() {
+    $('.box-is-player').click(function() {
+        if($(this).hasClass("box-is-player") === true) {
+            if (focusRobot != null) {
+                //focusRobot.css({"border": "2px solid blue"});
+                $('.available_move').unbind();
+                if (getRobotID($(this)) !== getRobotID(focusRobot)) {
+                    $(".mapbox").removeClass("available_move");
+                    $(".mapbox").removeClass("isFocused");
+                }
+            }
+            focusRobot = $(this);
+            action($(this));
+        }
     });
 }
 
-
-function action(robot){
+function action(robotEle){
     if(isPlayerMove === true){
-        $(robot).css({"border":"2px solid orange"});
-        var robotClass = robot.attr('class').replace("mapbox", "").replace("box-is-player", "").replace("data-box-", "").trim();
+        $(robotEle).addClass("isFocused");
+        var robotClass = robotEle.attr('class').replace("mapbox", "").replace("box-is-player", "").replace("data-box-", "").trim();
         robotClass = robotClass.split("-");
 
         var focus_robot_x = parseInt(robotClass[0]);
         var focus_robot_y = parseInt(robotClass[1]);
 
-        var robotID = getRobotID(robot);
+        var robotID = getRobotID(robotEle);
         var RobotData = getRobotData(robotID);
 
         var moveLevel = RobotData.moveLevel;
@@ -139,6 +145,7 @@ function action(robot){
         });
 
         showMove(available_pos);
+        moveListener();
 
     } else {
         alert("Not your turn!");
@@ -148,10 +155,43 @@ function action(robot){
 function showMove(available_pos){
     $.each( available_pos, function( key, value ) {
         var canMovePos = "data-box-"+value.x+"-"+value.y;
-        //$("."+canMovePos).css({"background-color":"#5E8BEB"});
-        $("."+canMovePos).addClass("available_move");
+        if(!$("."+canMovePos).hasClass("box-is-player")){
+            $("."+canMovePos).addClass("available_move");
+        }
     });
 }
+
+function moveListener() {
+    $('.available_move').click(function() {
+        if($(this).hasClass("available_move")) {
+            robotMoveToNewPoint($(this),focusRobot)
+        }
+    });
+}
+
+function robotMoveToNewPoint(movedPosEle,robotEle) {
+    //ll(robotEle);
+    var newrobot = getRobotID($(robotEle));
+    var RobotData = getRobotData(newrobot);
+
+    //Remove from original point
+    $(robotEle).find("img").remove();
+    $(robotEle).css({"border":"", "background-size": ""});
+    $(robotEle).removeClass("isFocused");
+    $(robotEle).removeClass("box-is-player");
+    $(".mapbox").removeClass("available_move");
+
+    $(movedPosEle).css({"border":"2px solid blue"});
+    $(movedPosEle).html("<img src='./assets/robot"+RobotData.robotID+".png' data-robot='"+newrobot+"' style='filter:grayscale(100%)'>");
+    $(movedPosEle).addClass("box-is-player player_moved");
+
+    //clickBoxPlayerListener();
+}
+
+function resetMap() {
+    
+}
+
 
 function getMoveMatrix(available_pos= []){
     var matrixPos = [];
@@ -175,7 +215,6 @@ function getRobotData(robotID){
 }
 
 
-
 function onlyUnique(value, index, self) {
     return self.indexOf(value) === index;
 }
@@ -183,6 +222,7 @@ function onlyUnique(value, index, self) {
 
 /* Developer mode button */
 $('#developer-btn').on('click', function() {
+    clickBoxPlayerListener();
     var $this = $(this);
     $this.button('loading');
     if($this.parent().hasClass("in-develop")){
@@ -207,6 +247,6 @@ function developerMode(enable = true){
     }
 }
 
-function log(log){
+function ll(log){
     console.log(log);
 }

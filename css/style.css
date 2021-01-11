@@ -336,6 +336,10 @@ th,
   cursor: pointer;
 }
 
+.isFocused{
+  border: 2px solid orange !important;
+}
+
 .available_move{
   background-color: #5E8BEB !important;
   cursor: pointer;
