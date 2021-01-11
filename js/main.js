@@ -10,7 +10,7 @@ $("#newGameBtn").on("click", function() {
         $("#newGameBtn, #loadGameBtn , #main-header").css("display", "none");
         $("#map").css("display", "block");
 
-        createMap(20);
+        createMap(25);
         placeRobot();
         isPlayerMove = true;
     }
@@ -70,7 +70,6 @@ function placeRobot(){
     });
 
     clickBoxPlayerListener();
-
 }
 
 function clickBoxPlayerListener() {
@@ -84,8 +83,10 @@ function clickBoxPlayerListener() {
                     $(".mapbox").removeClass("isFocused");
                 }
             }
-            focusRobot = $(this);
-            action($(this));
+            if(getRobotStatus(getRobotID($(this))) === false) {
+                focusRobot = $(this);
+                action($(this));
+            }
         }
     });
 }
@@ -171,8 +172,8 @@ function moveListener() {
 
 function robotMoveToNewPoint(movedPosEle,robotEle) {
     //ll(robotEle);
-    var newrobot = getRobotID($(robotEle));
-    var RobotData = getRobotData(newrobot);
+    var robotID = getRobotID($(robotEle));
+    var RobotData = getRobotData(robotID);
 
     //Remove from original point
     $(robotEle).find("img").remove();
@@ -182,14 +183,43 @@ function robotMoveToNewPoint(movedPosEle,robotEle) {
     $(".mapbox").removeClass("available_move");
 
     $(movedPosEle).css({"border":"2px solid blue"});
-    $(movedPosEle).html("<img src='./assets/robot"+RobotData.robotID+".png' data-robot='"+newrobot+"' style='filter:grayscale(100%)'>");
+    $(movedPosEle).append("<img src='./assets/robot"+RobotData.robotID+".png' data-robot='"+robotID+"' style='filter:grayscale(100%)'>");
     $(movedPosEle).addClass("box-is-player player_moved");
 
     //clickBoxPlayerListener();
+
+    //Set robot isMoved status to true;
+    robot.player[robotID]["isMoved"] = true;
+
+    //Set robot new coordinate
+    var newCoordinate = getCoordinateByEle(movedPosEle);
+    robot.player[robotID]["x"] = parseInt(newCoordinate[0]);
+    robot.player[robotID]["y"] = parseInt(newCoordinate[1]);
 }
 
-function resetMap() {
-    
+function resetMap(resetRobotStatus = false) {
+    //Remove and delete whole map element
+    $("#map").html("");
+
+    //Recreate new map
+    createMap(25);
+
+    //Place Robot , init the game
+    placeRobot();
+
+    //Init listener
+    clickBoxPlayerListener();
+
+    if(resetRobotStatus === true){
+        resetPlayerRobotStatus();
+    }
+}
+
+function getCoordinateByEle(ele) {
+    var coordinate = ele.find(".developer-coordinate");
+    coordinate = coordinate.html();
+
+    return coordinate.split("-");
 }
 
 
@@ -202,6 +232,18 @@ function getMoveMatrix(available_pos= []){
     });
 
     return matrixPos;
+}
+
+function getRobotStatus(robotID){
+    var robotStatus = robot.player[robotID]["isMoved"];
+    return robotStatus;
+}
+
+
+function resetPlayerRobotStatus(){
+    $.each( robot.player, function( key, value ) {
+        robot.player[key]["isMoved"] = false;
+    });
 }
 
 function getRobotID($element){
@@ -222,7 +264,7 @@ function onlyUnique(value, index, self) {
 
 /* Developer mode button */
 $('#developer-btn').on('click', function() {
-    clickBoxPlayerListener();
+    resetMap(true);
     var $this = $(this);
     $this.button('loading');
     if($this.parent().hasClass("in-develop")){
@@ -241,7 +283,7 @@ $('#developer-btn').on('click', function() {
 
 function developerMode(enable = true){
     if(enable === true){
-        $(".developer-coordinate").css('display',"block");
+        //$(".developer-coordinate").css('display',"block");
     } else {
         $(".developer-coordinate").css('display',"none");
     }

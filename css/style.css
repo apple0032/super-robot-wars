@@ -321,6 +321,7 @@ th,
   display: inline-block;
   border: 1px solid;
   vertical-align: top;
+  /* background-color: transparent !important; */
 }
 
 .mapbox img{
