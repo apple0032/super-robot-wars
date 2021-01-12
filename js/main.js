@@ -188,10 +188,10 @@ function robotMoveToNewPoint(movedPosEle,robotEle) {
 
     //clickBoxPlayerListener();
 
-    //Set robot isMoved status to true;
+    //Update robot isMoved status to true;
     robot.player[robotID]["isMoved"] = true;
 
-    //Set robot new coordinate
+    //Update robot new coordinate
     var newCoordinate = getCoordinateByEle(movedPosEle);
     robot.player[robotID]["x"] = parseInt(newCoordinate[0]);
     robot.player[robotID]["y"] = parseInt(newCoordinate[1]);
@@ -283,7 +283,7 @@ $('#developer-btn').on('click', function() {
 
 function developerMode(enable = true){
     if(enable === true){
-        //$(".developer-coordinate").css('display',"block");
+        $(".developer-coordinate").css('display',"block");
     } else {
         $(".developer-coordinate").css('display',"none");
     }
