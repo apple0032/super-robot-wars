@@ -1,3 +1,6 @@
-# JS-Board-Game-JQuery (Super-Robot-Wars)
+# Super Robot Wars
 
-OpenClassrooms Project 6. (JavaScript, OOP, DOM, JQuery)
+
+<p align="center">
+  <img src="https://i.ibb.co/WvXc9cn/srw.png">
+</p>
