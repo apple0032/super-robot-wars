@@ -3,6 +3,7 @@ var clickSound = new Audio('./assets/soundeffect/click.mp3');
 var animationTime = 300;
 
 var isPlayerMove;
+var isDoingMove = false;
 var focusRobot;
 
 $("#newGameBtn").on("click", function() {
@@ -105,6 +106,11 @@ function clickBoxPlayerListener() {
         if(!$(this).hasClass("box-is-player")){
             closeRobotMenu();
         }
+        if(isDoingMove === true && (!$(this).hasClass("available_move")) && (!$(this).hasClass("box-is-player"))){
+            //Disable move action if 1. Doing move 2.Not inside move area 3.Not robot itself
+            $(".mapbox").removeClass("available_move");
+            $(focusRobot).removeClass("isFocused");
+        }
     });
 
     $('.box-is-player').click(function(e) {
@@ -197,6 +203,8 @@ function showMove(available_pos){
             $("."+canMovePos).addClass("available_move");
         }
     });
+
+    isDoingMove = true;
 }
 
 function moveListener() {
