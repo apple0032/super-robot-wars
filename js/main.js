@@ -1,11 +1,12 @@
 var mainBGM = new Audio('./assets/bgm/srt_f_033.MP3');
 var clickSound = new Audio('./assets/soundeffect/click.MP3');
+var animationTime = 300;
 
 var isPlayerMove;
 var focusRobot;
 
 $("#newGameBtn").on("click", function() {
-    clickSound.play();
+    ckSound();
     if ($(event.target).attr("id") === "newGameBtn") {
         //mainBGM.play();
 
@@ -20,8 +21,12 @@ $("#newGameBtn").on("click", function() {
 });
 
 $("#loadGameBtn").on("click", function() {
-    clickSound.play();
+    ckSound();
 });
+
+function ckSound() {
+    clickSound.play();
+}
 
 function createMap(size = 12){
     var col = size;
@@ -81,6 +86,7 @@ function placeRobot(){
 
 function clickBoxPlayerListener() {
     $('.box-is-player').click(function() {
+        ckSound();
         if($(this).hasClass("box-is-player") === true) {
             if (focusRobot != null) {
                 //focusRobot.css({"border": "2px solid blue"});
@@ -191,7 +197,6 @@ function robotMoveToNewPoint(movedPosEle,robotEle) {
     var yTarget = movedPosEle[0].offsetTop;
 
     //Add move animation
-    var animationTime = 300;
     $(robotEle).find("img").css({"position":"absolute", "left": xSource, "top" : ySource});
     ($(robotEle).find("img")).animate({left: xTarget, top: yTarget}, animationTime, "swing");
     $(".mapbox").removeClass("available_move");
