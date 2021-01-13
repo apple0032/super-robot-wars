@@ -180,6 +180,11 @@ body {
   cursor: not-allowed;
 }
 
+.player_moved{
+  filter:grayscale(100%);
+}
+
+
 
 
 .developer-coordinate{

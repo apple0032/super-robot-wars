@@ -49,21 +49,6 @@ function createMap(size = 12){
     $("#map").html(mapHTML);
 }
 
-var robot = {
-    'player':{
-        'robotID_3_1' : {x:2, y:2, robotID: 3, moveLevel : 3, isMoved: false},
-        'robotID_3_2' : {x:3, y:3, robotID: 3, moveLevel : 3, isMoved: false},
-        'robotID_5_1' : {x:3, y:4, robotID: 5, moveLevel : 3, isMoved: false},
-        'robotID_5_2' : {x:2, y:5, robotID: 5, moveLevel : 3, isMoved: false},
-        'robotID_6': {x:14, y:11, robotID: 6, moveLevel : 4, isMoved: false}
-    },
-    'ai':{
-        'robotID_4_1' : {x:15, y:12, robotID: 4, moveLevel : 4, isMoved: false},
-        'robotID_4_2' : {x:16, y:11, robotID: 4, moveLevel : 4, isMoved: false},
-        'robotID_4_3' : {x:17, y:11, robotID: 4, moveLevel : 4, isMoved: false},
-        'robotID_4_4' : {x:18, y:12, robotID: 4, moveLevel : 4, isMoved: false},
-    }
-};
 
 function placeRobot(){
     $.each( robot, function( key, value ) {
@@ -106,11 +91,13 @@ function clickBoxPlayerListener() {
         if(!$(this).hasClass("box-is-player")){
             closeRobotMenu();
         }
-        if(isDoingMove === true && (!$(this).hasClass("available_move")) && (!$(this).hasClass("box-is-player"))){
-            //Disable move action if 1. Doing move 2.Not inside move area 3.Not robot itself
+        if(isDoingMove === true && (!$(this).hasClass("available_move")) ){
+            //Disable move action if 1. Doing move 2.Not inside move area
             $(".mapbox").removeClass("available_move");
             $(focusRobot).removeClass("isFocused");
+            focusRobot = null;
         }
+        $('#afterMove_idle').click(); //idle anytime click outside after move a robot
     });
 
     $('.box-is-player').click(function(e) {
@@ -231,22 +218,23 @@ function robotMoveToNewPoint(movedPosEle,robotEle) {
     //Add move animation
     $(robotEle).find("img").css({"position":"absolute", "left": xSource, "top" : ySource});
     ($(robotEle).find("img")).animate({left: xTarget, top: yTarget}, animationTime, "swing");
-    $(".mapbox").removeClass("available_move");
-    $(robotEle).removeClass("isFocused");
-    $(robotEle).removeClass("box-is-player");
-    $(robotEle).css({"border":"", "background-size": ""});
+
+    $(robotEle).removeClass("isFocused"); //clear focused bot(remove orange border as well)
+    $(robotEle).removeClass("box-is-player"); //因為移動了新的位置, 舊位置要移除player class, 而disable move不用因為還留在原位
+    $(".mapbox").removeClass("available_move"); //clear all available move area
 
     setTimeout(function(){
-        $(robotEle).find("img").remove();
-        $(movedPosEle).css({"border":"2px solid blue"});
-        $(movedPosEle).append("<img src='./assets/robot"+RobotData.robotID+".png' data-robot='"+robotID+"' style='filter:grayscale(100%)'>");
-        $(movedPosEle).addClass("box-is-player player_moved");
+        //When finishing move
+        $(robotEle).find("img").remove(); //clear old pos robot
+        $(movedPosEle).css({"border":"2px solid blue"}); //Add back blue border to show the robot own by player //可於此處implement兩回以上移動的能力
+        $(movedPosEle).append("<img class='player_moved' src='./assets/robot"+RobotData.robotID+".png' data-robot='"+robotID+"'>"); //new image show //可於此處implement兩回以上移動的能力
+        $(movedPosEle).addClass("box-is-player");  //可於此處implement兩回以上移動的能力
+
+        //Update robot isMoved status to true;
+        robot.player[robotID]["isMoved"] = true; //可於此處implement兩回以上移動的能力
 
         //Reset focused robot after moved to a new position
         focusRobot = null;
-
-        //Update robot isMoved status to true;
-        robot.player[robotID]["isMoved"] = true;
 
         //Update robot new coordinate
         var newCoordinate = getCoordinateByEle(movedPosEle);
@@ -254,8 +242,36 @@ function robotMoveToNewPoint(movedPosEle,robotEle) {
         robot.player[robotID]["y"] = parseInt(newCoordinate[1]);
 
         clickBoxPlayerListener();
+
+        //Apply attack/idle logic after move to a new pos
+        openAfterMoveMenu(xTarget,yTarget);
+
+        //choose either attack or idle
+        $('#afterMove_idle').unbind(); //以防止double register listener
+        $('#afterMove_idle').click(function() {
+            ckSound();
+            $("#AfterMoveMenu").css({"display":"none"});
+        });
+
+        $('#afterMove_attack').unbind();
+        $('#afterMove_attack').click(function() {
+            ckSound();
+            attackAfterMove(movedPosEle);
+        });
     }, animationTime);
+
 }
+
+
+function openAfterMoveMenu(mouseX,mouseY) {
+    $("#AfterMoveMenu").css({"display":"block", "left" : (mouseX+ 25), "top" : (mouseY + 25)});
+}
+
+function attackAfterMove(ele){
+    ll(ele);
+
+}
+
 
 function resetMap(resetRobotStatus = false) {
     //Remove and delete whole map element
@@ -317,6 +333,12 @@ function getRobotData(robotID){
 }
 
 
+
+
+
+
+
+
 function onlyUnique(value, index, self) {
     return self.indexOf(value) === index;
 }
@@ -352,3 +374,20 @@ function developerMode(enable = true){
 function ll(log){
     console.log(log);
 }
+
+
+var robot = {
+    'player':{
+        'robotID_3_1' : {x:2, y:2, robotID: 7, moveLevel : 25, isMoved: false},
+        'robotID_3_2' : {x:3, y:3, robotID: 3, moveLevel : 3, isMoved: false},
+        'robotID_5_1' : {x:3, y:4, robotID: 5, moveLevel : 3, isMoved: false},
+        'robotID_5_2' : {x:2, y:5, robotID: 5, moveLevel : 3, isMoved: false},
+        'robotID_6': {x:14, y:11, robotID: 6, moveLevel : 4, isMoved: false}
+    },
+    'ai':{
+        'robotID_4_1' : {x:15, y:12, robotID: 4, moveLevel : 4, isMoved: false},
+        'robotID_4_2' : {x:16, y:11, robotID: 4, moveLevel : 4, isMoved: false},
+        'robotID_4_3' : {x:17, y:11, robotID: 4, moveLevel : 4, isMoved: false},
+        'robotID_4_4' : {x:18, y:12, robotID: 4, moveLevel : 4, isMoved: false},
+    }
+};
