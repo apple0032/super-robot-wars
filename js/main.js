@@ -1,5 +1,5 @@
-var mainBGM = new Audio('./assets/bgm/srt_f_033.MP3');
-var clickSound = new Audio('./assets/soundeffect/click.MP3');
+var mainBGM = new Audio('./assets/bgm/srt_f_033.mp3');
+var clickSound = new Audio('./assets/soundeffect/click.mp3');
 var animationTime = 300;
 
 var isPlayerMove;
@@ -27,6 +27,7 @@ $("#loadGameBtn").on("click", function() {
 function ckSound() {
     clickSound.play();
 }
+
 
 function createMap(size = 12){
     var col = size;
@@ -84,12 +85,36 @@ function placeRobot(){
     clickBoxPlayerListener();
 }
 
+function openRobotMenu(e) {
+    mouseX =  ((e.pageX) + 5) + "px";
+    mouseY = ((e.pageY) + 5) + "px";
+    $("#contextMenu").css({"display":"block", "left" : mouseX, "top" : mouseY});
+}
+
+function closeRobotMenu() {
+    $("#contextMenu").css({"display":"none"});
+}
+
+
 function clickBoxPlayerListener() {
-    $('.box-is-player').click(function() {
+
+    $("#player_move").click(function(e) {
         ckSound();
+        action(focusRobot);
+        closeRobotMenu();
+    });
+
+    $(".mapbox").click(function(e) {
+        if(!$(this).hasClass("box-is-player")){
+            closeRobotMenu();
+        }
+    });
+
+    $('.box-is-player').click(function(e) {
         if($(this).hasClass("box-is-player") === true) {
+            ckSound();
+            openRobotMenu(e);
             if (focusRobot != null) {
-                //focusRobot.css({"border": "2px solid blue"});
                 $('.available_move').unbind();
                 if (getRobotID($(this)) !== getRobotID(focusRobot)) {
                     $(".mapbox").removeClass("available_move");
@@ -98,7 +123,9 @@ function clickBoxPlayerListener() {
             }
             if(getRobotStatus(getRobotID($(this))) === false) {
                 focusRobot = $(this);
-                action($(this));
+                $("#player_move").removeClass("disable_move");
+            } else {
+                $("#player_move").addClass("disable_move");
             }
         }
     });
@@ -210,6 +237,9 @@ function robotMoveToNewPoint(movedPosEle,robotEle) {
         $(movedPosEle).append("<img src='./assets/robot"+RobotData.robotID+".png' data-robot='"+robotID+"' style='filter:grayscale(100%)'>");
         $(movedPosEle).addClass("box-is-player player_moved");
 
+        //Reset focused robot after moved to a new position
+        focusRobot = null;
+
         //Update robot isMoved status to true;
         robot.player[robotID]["isMoved"] = true;
 
@@ -291,7 +321,7 @@ function onlyUnique(value, index, self) {
 $('#developer-btn').on('click', function() {
     resetMap(true);
     var $this = $(this);
-    $this.button('loading');
+    //$this.button('loading');
     if($this.parent().hasClass("in-develop")){
         $this.parent().removeClass("in-develop");
         $this.css({"background-color": "#337ab7", "border": "none"});
