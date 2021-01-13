@@ -20,6 +20,8 @@ body {
   display: none;
 }
 #newGameBtn, #loadGameBtn {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 13px;
   display: inline-block;
   padding: 6px 40px;
   margin: 0px auto 20px auto;

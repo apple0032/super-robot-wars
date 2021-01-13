@@ -1,19 +1,26 @@
-var mainBGM = new Audio('./bgm/timetocome.MP3');
-var og = new Audio('./bgm/og.MP3');
+var mainBGM = new Audio('./assets/bgm/srt_f_033.MP3');
+var clickSound = new Audio('./assets/soundeffect/click.MP3');
+
 var isPlayerMove;
 var focusRobot;
 
 $("#newGameBtn").on("click", function() {
+    clickSound.play();
     if ($(event.target).attr("id") === "newGameBtn") {
         //mainBGM.play();
 
         $("#newGameBtn, #loadGameBtn , #main-header").css("display", "none");
         $("#map").css("display", "block");
 
+        //Game start
         createMap(25);
         placeRobot();
         isPlayerMove = true;
     }
+});
+
+$("#loadGameBtn").on("click", function() {
+    clickSound.play();
 });
 
 function createMap(size = 12){
@@ -171,30 +178,43 @@ function moveListener() {
 }
 
 function robotMoveToNewPoint(movedPosEle,robotEle) {
-    //ll(robotEle);
+    //Get robot data
     var robotID = getRobotID($(robotEle));
     var RobotData = getRobotData(robotID);
 
-    //Remove from original point
-    $(robotEle).find("img").remove();
-    $(robotEle).css({"border":"", "background-size": ""});
+    //Find original position
+    var xSource =  ($(robotEle).find("img"))[0].offsetLeft;
+    var ySource =  ($(robotEle).find("img"))[0].offsetTop;
+
+    //Find target position
+    var xTarget = (movedPosEle[0].offsetLeft)+2;
+    var yTarget = movedPosEle[0].offsetTop;
+
+    //Add move animation
+    var animationTime = 300;
+    $(robotEle).find("img").css({"position":"absolute", "left": xSource, "top" : ySource});
+    ($(robotEle).find("img")).animate({left: xTarget, top: yTarget}, animationTime, "swing");
+    $(".mapbox").removeClass("available_move");
     $(robotEle).removeClass("isFocused");
     $(robotEle).removeClass("box-is-player");
-    $(".mapbox").removeClass("available_move");
+    $(robotEle).css({"border":"", "background-size": ""});
 
-    $(movedPosEle).css({"border":"2px solid blue"});
-    $(movedPosEle).append("<img src='./assets/robot"+RobotData.robotID+".png' data-robot='"+robotID+"' style='filter:grayscale(100%)'>");
-    $(movedPosEle).addClass("box-is-player player_moved");
+    setTimeout(function(){
+        $(robotEle).find("img").remove();
+        $(movedPosEle).css({"border":"2px solid blue"});
+        $(movedPosEle).append("<img src='./assets/robot"+RobotData.robotID+".png' data-robot='"+robotID+"' style='filter:grayscale(100%)'>");
+        $(movedPosEle).addClass("box-is-player player_moved");
 
-    //clickBoxPlayerListener();
+        //Update robot isMoved status to true;
+        robot.player[robotID]["isMoved"] = true;
 
-    //Update robot isMoved status to true;
-    robot.player[robotID]["isMoved"] = true;
+        //Update robot new coordinate
+        var newCoordinate = getCoordinateByEle(movedPosEle);
+        robot.player[robotID]["x"] = parseInt(newCoordinate[0]);
+        robot.player[robotID]["y"] = parseInt(newCoordinate[1]);
 
-    //Update robot new coordinate
-    var newCoordinate = getCoordinateByEle(movedPosEle);
-    robot.player[robotID]["x"] = parseInt(newCoordinate[0]);
-    robot.player[robotID]["y"] = parseInt(newCoordinate[1]);
+        clickBoxPlayerListener();
+    }, animationTime);
 }
 
 function resetMap(resetRobotStatus = false) {
