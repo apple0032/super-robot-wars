@@ -100,6 +100,7 @@ body {
   border: 1px solid;
   vertical-align: top;
   /* background-color: transparent !important; */
+  background-color: lavender;
 }
 
 .mapbox img{
@@ -114,6 +115,15 @@ body {
 .box-is-player, .box-is-ai{
   cursor: pointer;
 }
+
+.box-is-ai{
+  border: 2px solid red;
+}
+
+.box-is-player{
+  border: 2px solid blue;
+}
+
 
 .isFocused{
   border: 2px solid orange !important;

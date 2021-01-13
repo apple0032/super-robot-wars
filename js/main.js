@@ -38,7 +38,7 @@ function createMap(size = 12){
     for (i = 1; i <= row; i++) {
        mapHTML += '<div class="map-row data-row-'+i+'">';
         for (j = 1; j <= col; j++) {
-            mapHTML += '<div class="mapbox data-box-'+j+'-'+i+'" style="background-color:lavender;">';
+            mapHTML += '<div class="mapbox data-box-'+j+'-'+i+'">';
             mapHTML += '<div class="developer-coordinate">'+j+'-'+i+'</div>';
             mapHTML += '</div>'
         }
@@ -54,7 +54,7 @@ var robot = {
         'robotID_3_2' : {x:3, y:3, robotID: 3, moveLevel : 3, isMoved: false},
         'robotID_5_1' : {x:3, y:4, robotID: 5, moveLevel : 3, isMoved: false},
         'robotID_5_2' : {x:2, y:5, robotID: 5, moveLevel : 3, isMoved: false},
-        'robotID_6': {x:8, y:8, robotID: 6, moveLevel : 4, isMoved: false}
+        'robotID_6': {x:14, y:11, robotID: 6, moveLevel : 4, isMoved: false}
     },
     'ai':{
         'robotID_4_1' : {x:15, y:12, robotID: 4, moveLevel : 4, isMoved: false},
@@ -66,15 +66,12 @@ var robot = {
 
 function placeRobot(){
     $.each( robot, function( key, value ) {
-        //console.log( key + ": " + value );
         $.each( value, function( key2, value2 ) {
             var robotPos = "data-box-"+value2.x+"-"+value2.y;
             if(key === "ai"){
-                $("."+robotPos).css({"border":"2px solid red"});
                 $("."+robotPos).append("<img src='./assets/robot"+value2.robotID+".png'>");
                 $("."+robotPos).addClass("box-is-ai");
             } else {
-                $("."+robotPos).css({"border":"2px solid blue"});
                 $("."+robotPos).append("<img src='./assets/robot"+value2.robotID+".png' data-robot='"+key2+"'>");
                 $("."+robotPos).addClass("box-is-player");
             }
@@ -196,7 +193,7 @@ function action(robotEle){
 function showMove(available_pos){
     $.each( available_pos, function( key, value ) {
         var canMovePos = "data-box-"+value.x+"-"+value.y;
-        if(!$("."+canMovePos).hasClass("box-is-player")){
+        if( (!$("."+canMovePos).hasClass("box-is-player")) && (!$("."+canMovePos).hasClass("box-is-ai")) ){  //Make sure position clicked dont have any robot
             $("."+canMovePos).addClass("available_move");
         }
     });
