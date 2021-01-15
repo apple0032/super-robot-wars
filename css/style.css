@@ -87,10 +87,24 @@ body {
   color: #689d9e;
 }
 
+#mainMap{
+  display: inline-block;
+
+  /*background-image: url("../assets/mission12.png");*/
+  /*background-size: 150%;*/
+  /*background-position: center;*/
+}
+
+#MapViewer{
+  display: inline-block;
+  vertical-align: top;
+}
 
 #map{
   text-align: center;
   margin: 0 auto;
+  display: inline-block;
+  padding-top: 20px;
 }
 
 .mapbox {
@@ -100,7 +114,7 @@ body {
   border: 1px solid #8e8e8ede;
   vertical-align: top;
   /* background-color: transparent !important; */
-  background-color: lavender;
+   background-color: lavender;
 }
 
 .mapbox img{
@@ -112,7 +126,7 @@ body {
   height: 40px;
 }
 
-.box-is-player, .box-is-ai{
+.box-is-player, .box-is-ai,.box-is-third{
   cursor: pointer;
 }
 
@@ -122,6 +136,10 @@ body {
 
 .box-is-player{
   border: 2px solid blue !important;
+}
+
+.box-is-third{
+  border: 2px solid #ffe12e;
 }
 
 
