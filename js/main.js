@@ -3,6 +3,7 @@ var clickSound = new Audio('./assets/soundeffect/click.mp3');
 var animationTime = 300;
 var movingTime = 500;
 var mapSize = 30;
+var turn = 1;
 
 var isPlayerMove;   //Player turn
 var isDoingMove = false;    //Playing selecting new position to move
@@ -94,6 +95,7 @@ function placeRobot(){
 function clickBoxPlayerListener() {
 
     if(isPlayerMove === true) {
+        $("#player_move").unbind();
         $("#player_move").click(function (e) {
             ckSound();
             action(focusRobot);
@@ -101,6 +103,7 @@ function clickBoxPlayerListener() {
             closeMainMenu();
         });
 
+        $('.mapbox').unbind();
         $(".mapbox").click(function (e) {
             if (!$(this).hasClass("box-is-player")) {
                 closeRobotMenu();
@@ -116,8 +119,9 @@ function clickBoxPlayerListener() {
             $('#afterMove_idle').click(); //idle anytime click outside after move a robot
         });
 
+        $('.box-is-player').unbind();
         $('.box-is-player').click(function (e) {
-            if ($(this).hasClass("box-is-player") === true) {
+            if ($(this).hasClass("box-is-player") === true && ( isAiMove === false) && (isThirdMove === false)  ) {
                 ckSound();
                 openRobotMenu(e);
                 closeMainMenu();
@@ -137,7 +141,7 @@ function clickBoxPlayerListener() {
             }
         });
 
-
+        $("#mainMenu_endTurn").unbind();
         $("#mainMenu_endTurn").click(function (e) {
             ckSound();
             isPlayerMove = false;
@@ -217,8 +221,10 @@ function showMove(available_pos, target = "player"){
         ){  //Make sure position clicked dont have any robot or items etc....
             if(target === "player") {
                 $("." + canMovePos).addClass("available_move");
-            } else {
+            } else if(target === "ai") {
                 $("." + canMovePos).addClass("available_move_ai");
+            } else {
+                $("." + canMovePos).addClass("available_move_third");
             }
         }
     });
@@ -271,20 +277,22 @@ function robotMoveToNewPoint(movedPosEle,robotEle, target = "player") {
     setTimeout(function(){
         //When finishing move
         $(robotEle).find("img").remove(); //clear old pos robot
-        $(movedPosEle).append("<img class='robot_moved' src='./assets/robot"+RobotData.robotID+".png' data-robot='"+robotID+"'>"); //new image show //可於此處implement兩回以上移動的能力
+        $(movedPosEle).append("<img class='robot_moved' src='./assets/robot"+RobotData.robotID+".png' data-robot='"+robotID+"'>"); //new image show //控制二回移動
 
         if(target === "player") {
-            $(movedPosEle).addClass("box-is-player");  //可於此處implement兩回以上移動的能力
+            $(movedPosEle).addClass("box-is-player");
         }
         if(target === "ai") {
-            $(movedPosEle).addClass("box-is-ai");  //可於此處implement兩回以上移動的能力
+            $(movedPosEle).addClass("box-is-ai");
         }
         if(target === "third") {
-            $(movedPosEle).addClass("box-is-third");  //可於此處implement兩回以上移動的能力
+            $(movedPosEle).addClass("box-is-third");
         }
 
         //Update robot isMoved status to true;
-        robot[target][robotID]["isMoved"] = true; //可於此處implement兩回以上移動的能力
+        robot[target][robotID]["isMoved"] = true; //控制二回移動
+
+        clickBoxPlayerListener(); //控制二回移動
 
 
         //Reset focused robot after moved to a new position
@@ -319,6 +327,7 @@ function robotMoveToNewPoint(movedPosEle,robotEle, target = "player") {
 }
 
 function openRobotMenu(e) {
+    closeAfterMoveMenu();
     mouseX =  ((e.pageX) + 5) + "px";
     mouseY = ((e.pageY) + 5) + "px";
     $("#contextMenu").css({"display":"block", "left" : mouseX, "top" : mouseY});
@@ -339,7 +348,7 @@ function closeAfterMoveMenu() {
 
 function openMainMenu(e) {
     ckSound();
-    if(isDoingMove === false) {
+    if( (isDoingMove === false) && ( isAiMove === false) && (isThirdMove === false) ) {
         mouseX = ((e.pageX) + 5) + "px";
         mouseY = ((e.pageY) + 5) + "px";
         $("#MainMenu").css({"display": "block", "left": mouseX, "top": mouseY});
@@ -382,11 +391,16 @@ function attackAfterMove(ele){
 
 
 async function botMovingMain(){
+    //Main Flow of the game
 
+    //1. Player always move first, listen for end turn event
+
+    //2. Bot move turn
     await aiMove();
     await delay(500);   //AI回合end, wait a moment....
 
-    if ('third' in robot) { //Check if 第三方勢力(third) existed
+    //3. Check if 第三方勢力(third) existed, if yes run third turn
+    if ('third' in robot) {
         if(isPlayerMove === false) {
             await thirdMove();
         }
@@ -394,9 +408,11 @@ async function botMovingMain(){
 
     await delay(600);   //Wait a moment, before start player turn
 
-    if(isThirdMove === false) {
+
+    if(isThirdMove === false) {     //If no third group or if third robot finish their turn -> start new player turn
         isPlayerMove = true;
         resetMap(true);
+        turn++;
     }
 }
 
@@ -406,26 +422,23 @@ async function aiMove() {
     const aiMoving = async () => {
 
         //Will loop through all ai robot
-        action($(".data-box-18-12"), "ai");
-        setTimeout(function(){
-            robotMoveToNewPoint($(".data-box-18-8"),$(".data-box-18-12"),"ai");
-        }, movingTime);
+        var aiRobot = robot.ai;
+        for (const value of Object.keys(aiRobot)) {
 
-        await delay(movingTime + 300);
+            var currentRobot = aiRobot[value];
+            var newX = (currentRobot.x) + 1;
+            var newY = (currentRobot.y) + 1;
 
-        //Each time a AI moved, they can make attack action, need player reaction logic here, update isPlayerMove flag
-        //isPlayerMove = true; //FOR TESTING
-
-        if(isPlayerMove === false) {
-            action($(".data-box-17-11"), "ai");
-            setTimeout(function () {
-                robotMoveToNewPoint($(".data-box-15-10"), $(".data-box-17-11"), "ai");
+            action($(".data-box-"+currentRobot.x+"-"+currentRobot.y), "ai");
+            setTimeout(function(){
+                robotMoveToNewPoint($(".data-box-"+newX+"-"+newY),$(".data-box-"+currentRobot.x+"-"+currentRobot.y),"ai");
             }, movingTime);
 
-            await delay(movingTime + 300);
+            await delay(movingTime + 500);
         }
 
-        //loop until all robot done moving
+
+        await delay(movingTime + 300);
 
         isAiMove = false; //AI已完成所有行動, 結束回合
     };
@@ -621,8 +634,8 @@ var robot = {
         'robotID_4_3' : {x:17, y:11, robotID: 4, moveLevel : 4, isMoved: false},
         'robotID_4_4' : {x:18, y:12, robotID: 4, moveLevel : 4, isMoved: false},
     },
-    'third':{
-        'robotID_4_1' : {x:25, y:2, robotID: 8, moveLevel : 5, isMoved: false},
-        'robotID_4_2' : {x:26, y:3, robotID: 9, moveLevel : 7, isMoved: false}
-    }
+    // 'third':{
+    //     'robotID_4_1' : {x:25, y:2, robotID: 8, moveLevel : 5, isMoved: false},
+    //     'robotID_4_2' : {x:26, y:3, robotID: 9, moveLevel : 7, isMoved: false}
+    // }
 };

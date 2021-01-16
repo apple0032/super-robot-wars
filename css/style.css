@@ -156,7 +156,9 @@ body {
   background-color: #d83c2fba !important;
 }
 
-
+.available_move_third{
+  background-color: rgba(255, 225, 46, 0.73) !important;
+}
 
 
 
