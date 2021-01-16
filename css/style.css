@@ -95,9 +95,23 @@ body {
   /*background-position: center;*/
 }
 
-#MapViewer{
+#MapViewer_container{
   display: inline-block;
   vertical-align: top;
+  text-align: left;
+  width: 80px;
+}
+
+#MapViewer{
+  width:25px;
+  background-color: #404040;
+  color: white;
+  font-family: 'Noto Serif JP', serif;
+  padding-top: 10px;
+  border-top-right-radius: 15px;
+  border-bottom-right-radius: 15px;
+  text-align: center;
+  cursor: pointer;
 }
 
 #map{

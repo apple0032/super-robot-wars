@@ -2,7 +2,7 @@ var mainBGM = new Audio('./assets/bgm/srt_f_033.mp3');
 var clickSound = new Audio('./assets/soundeffect/click.mp3');
 var animationTime = 300;
 var movingTime = 500;
-var mapSize = 30;
+var mapSize = 27;
 var turn = 1;
 
 var isPlayerMove;   //Player turn
@@ -27,6 +27,7 @@ $("#newGameBtn").on("click", function() {
         createMap(mapSize);
         placeRobot();
         activeMainMenuListener();
+        updateMapViewer();
 
         //Test AI auto moving
 
@@ -63,9 +64,30 @@ function createMap(size = 12){
     }
 
     mapHTML += '</div>';
-    mapHTML += '<div id="MapViewer" style="height: '+viewerHeight+'px; ">MENU</div>';
+
+    mapHTML += '<div id="MapViewer_container">';
+        mapHTML += '<div id="MapViewer" style="height: '+viewerHeight+'px; ">';
+        mapHTML += '<i class="fas fa-dice" data-toggle="tooltip" title="現在回合"></i><br>';
+        mapHTML += '<div class="turn_number">'+turn+'</div>';
+        mapHTML += '<br>';
+        mapHTML += '<i class="fas fa-chess-knight" data-toggle="tooltip" title="我方行動"></i><br>';
+        mapHTML += '<div class="move_remain"></div>';
+        mapHTML += '<br>';
+        mapHTML += '<i class="fas fa-chess-king" data-toggle="tooltip" title="我方兵力"></i><br>';
+        mapHTML += '<div class="player_robot_remain"></div>';
+        mapHTML += '<br>';
+        mapHTML += '<i class="fas fa-chess-rook" data-toggle="tooltip" title="敵方兵力"></i><br>';
+        mapHTML += '<div class="ai_robot_remain"></div>';
+        mapHTML += '<br>';
+        if ('third' in robot) {
+            mapHTML += '<i class="fas fa-chess-queen" data-toggle="tooltip" title="第三勢力"></i><br>';
+            mapHTML += '<div class="third_robot_remain"></div>';
+        }
+        mapHTML += '</div>';
+    mapHTML += '</div>';
 
     $("#map").html(mapHTML);
+    $('[data-toggle="tooltip"]').tooltip();
 }
 
 
@@ -149,6 +171,28 @@ function clickBoxPlayerListener() {
 
         });
     }
+
+    mapViewerListener();
+}
+
+function mapViewerListener() {
+    $("#MapViewer").click(function(){
+        $("#MapViewer").animate({width: "80px"}, 70 );
+
+        setTimeout(function() {
+            $("#MapViewer .turn_number").html("第"+turn+"回合");
+            var mapData = getMapInformation();
+            $("#MapViewer .move_remain").html("我方行動<br>"+mapData.player.player_not_moved+"/"+mapData.player.total_player_robot);
+            $("#MapViewer .player_robot_remain").html("我方兵力<br>"+mapData.player.player_robot+"/"+mapData.player.total_player_robot);
+            $("#MapViewer .ai_robot_remain").html("敵方兵力<br>"+mapData.ai.ai_robot+"/"+mapData.ai.total_ai_robot);
+            $("#MapViewer .third_robot_remain").html("第三勢力<br>"+mapData.third.third_robot+"/"+mapData.third.total_third_robot);
+        }, 100);
+    });
+
+    $("#MapViewer_container").mouseleave(function(){
+        updateMapViewer();
+        $("#MapViewer").animate({width: "25px"}, 70 );
+    });
 }
 
 function action(robotEle, target = "player"){
@@ -303,7 +347,6 @@ function robotMoveToNewPoint(movedPosEle,robotEle, target = "player") {
         robot[target][robotID]["x"] = parseInt(newCoordinate[0]);
         robot[target][robotID]["y"] = parseInt(newCoordinate[1]);
 
-        //clickBoxPlayerListener();
 
         if(target === "player") {
             //Apply attack/idle logic after move to a new pos
@@ -321,6 +364,8 @@ function robotMoveToNewPoint(movedPosEle,robotEle, target = "player") {
                 ckSound();
                 attackAfterMove(movedPosEle);
             });
+
+            updateMapViewer();
         }
     }, animationTime);
 
@@ -406,18 +451,21 @@ async function botMovingMain(){
         }
     }
 
-    await delay(600);   //Wait a moment, before start player turn
+    await delay(200);   //Wait a moment, before start player turn
 
 
     if(isThirdMove === false) {     //If no third group or if third robot finish their turn -> start new player turn
         isPlayerMove = true;
         resetMap(true);
         turn++;
+
+        updateMapViewer();
     }
 }
 
 async function aiMove() {
     isAiMove = true; //flag of AI回合
+    updateMapViewer();
 
     const aiMoving = async () => {
 
@@ -450,6 +498,7 @@ async function aiMove() {
 
 async function thirdMove() {
     isThirdMove = true; //flag of third turn moving
+    updateMapViewer();
 
     const thirdMoving = async () => {
         if(isAiMove === false) {    //Check if all AI done moving
@@ -477,6 +526,75 @@ async function thirdMove() {
 
 
 
+function updateMapViewer() {
+
+    if(isPlayerMove === true){
+        $("#MapViewer").css("background","rgba(87,138,236,0.75)");
+    }
+
+    if(isAiMove === true) {
+        $("#MapViewer").css("background", "rgba(236,84,84,0.75)");
+    }
+
+    if(isThirdMove === true) {
+        $("#MapViewer").css("background", "rgba(255,175,39,0.75)");
+    }
+
+    //Update turn
+    $("#MapViewer .turn_number").html(turn);
+
+    //Update isDestroyed
+    MapData = getMapInformation();
+
+    $("#MapViewer .player_robot_remain").html(MapData.player.player_robot);
+    $("#MapViewer .move_remain").html(MapData.player.player_not_moved);
+    $("#MapViewer .ai_robot_remain").html(MapData.ai.ai_robot);
+    $("#MapViewer .third_robot_remain").html(MapData.third.third_robot);
+
+}
+
+function getMapInformation() {
+    var MapData = {};
+
+    var player_robot = 0;
+    var total_player_robot = 0;
+    var player_not_moved = 0;
+    $.each( robot.player, function( key, value ) {
+        total_player_robot++;
+        if(value.isDestroyed === false){ player_robot++; }
+        if(value.isDestroyed === false && value.isMoved === false){
+            player_not_moved++;
+        }
+    });
+
+    var ai_robot = 0;
+    var total_ai_robot = 0;
+    $.each( robot.ai, function( key, value ) {
+        total_ai_robot++;
+        if(value.isDestroyed === false){ ai_robot++; }
+    });
+
+    var third_robot = 0;
+    var total_third_robot = 0;
+    $.each( robot.third, function( key, value ) {
+        total_third_robot++;
+        if(value.isDestroyed === false){ third_robot++; }
+    });
+
+    MapData.player = {
+        "player_robot" : player_robot, "total_player_robot" : total_player_robot, "player_not_moved" : player_not_moved
+    };
+
+    MapData.ai = {
+        "ai_robot" : ai_robot , "total_ai_robot" :total_ai_robot
+    };
+
+    MapData.third = {
+        "third_robot" : third_robot, "total_third_robot" : total_third_robot
+    };
+
+    return MapData;
+}
 
 
 function resetMap(resetRobotStatus = false) {
@@ -622,20 +740,20 @@ function ll(log){
 
 var robot = {
     'player':{
-        'robotID_3_1' : {x:2, y:2, robotID: 7, moveLevel : 25, isMoved: false},
-        'robotID_3_2' : {x:3, y:3, robotID: 3, moveLevel : 3, isMoved: false},
-        'robotID_5_1' : {x:3, y:4, robotID: 5, moveLevel : 3, isMoved: false},
-        'robotID_5_2' : {x:2, y:5, robotID: 5, moveLevel : 3, isMoved: false},
-        'robotID_6': {x:14, y:11, robotID: 6, moveLevel : 4, isMoved: false}
+        'robotID_3_1' : {x:2, y:2, robotID: 7, moveLevel : 25, isMoved: false, isDestroyed : false},
+        'robotID_3_2' : {x:3, y:3, robotID: 3, moveLevel : 3, isMoved: false, isDestroyed : false},
+        'robotID_5_1' : {x:3, y:4, robotID: 5, moveLevel : 3, isMoved: false, isDestroyed : false},
+        'robotID_5_2' : {x:2, y:5, robotID: 5, moveLevel : 3, isMoved: false, isDestroyed : false},
+        'robotID_6': {x:5, y:4, robotID: 6, moveLevel : 4, isMoved: false, isDestroyed : false}
     },
     'ai':{
-        'robotID_4_1' : {x:15, y:12, robotID: 4, moveLevel : 4, isMoved: false},
-        'robotID_4_2' : {x:16, y:11, robotID: 4, moveLevel : 4, isMoved: false},
-        'robotID_4_3' : {x:17, y:11, robotID: 4, moveLevel : 4, isMoved: false},
-        'robotID_4_4' : {x:18, y:12, robotID: 4, moveLevel : 4, isMoved: false},
+        'robotID_4_1' : {x:15, y:12, robotID: 4, moveLevel : 4, isMoved: false, isDestroyed : false},
+        'robotID_4_2' : {x:16, y:11, robotID: 4, moveLevel : 4, isMoved: false, isDestroyed : false},
+        'robotID_4_3' : {x:17, y:11, robotID: 4, moveLevel : 4, isMoved: false, isDestroyed : false},
+        'robotID_4_4' : {x:18, y:12, robotID: 4, moveLevel : 4, isMoved: false, isDestroyed : false},
     },
-    // 'third':{
-    //     'robotID_4_1' : {x:25, y:2, robotID: 8, moveLevel : 5, isMoved: false},
-    //     'robotID_4_2' : {x:26, y:3, robotID: 9, moveLevel : 7, isMoved: false}
-    // }
+    'third':{
+        'robotID_4_1' : {x:25, y:2, robotID: 8, moveLevel : 5, isMoved: false, isDestroyed : false},
+        'robotID_4_2' : {x:26, y:3, robotID: 9, moveLevel : 7, isMoved: false, isDestroyed : false}
+    }
 };
