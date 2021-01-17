@@ -28,6 +28,7 @@ $("#newGameBtn").on("click", function() {
         placeRobot();
         activeMainMenuListener();
         updateMapViewer();
+        showTurnNotice();
 
         //Test AI auto moving
 
@@ -393,7 +394,7 @@ function closeAfterMoveMenu() {
 
 function openMainMenu(e) {
     ckSound();
-    if( (isDoingMove === false) && ( isAiMove === false) && (isThirdMove === false) ) {
+    if( (isDoingMove === false) && ( isAiMove === false) && (isThirdMove === false) && ( isPlayerMove === true) ) {
         mouseX = ((e.pageX) + 5) + "px";
         mouseY = ((e.pageY) + 5) + "px";
         $("#MainMenu").css({"display": "block", "left": mouseX, "top": mouseY});
@@ -460,12 +461,14 @@ async function botMovingMain(){
         turn++;
 
         updateMapViewer();
+        await showTurnNotice();
     }
 }
 
 async function aiMove() {
     isAiMove = true; //flag of AI回合
     updateMapViewer();
+    await showTurnNotice(); //Notice for changing turn
 
     const aiMoving = async () => {
 
@@ -499,6 +502,7 @@ async function aiMove() {
 async function thirdMove() {
     isThirdMove = true; //flag of third turn moving
     updateMapViewer();
+    await showTurnNotice();
 
     const thirdMoving = async () => {
         if(isAiMove === false) {    //Check if all AI done moving
@@ -594,6 +598,37 @@ function getMapInformation() {
     };
 
     return MapData;
+}
+
+async function showTurnNotice() {
+    if(isPlayerMove === true){
+        $("#map").css("filter","blur(3px)");
+        $("#turn_notice").html("我方回合");
+        $("#turn_notice").css("color","rgb(35 105 243)");
+        $("#turn_notice").fadeIn();
+    }
+
+    if(isAiMove === true){
+        $("#map").css("filter","blur(3px)");
+        $("#turn_notice").html("敵方回合");
+        $("#turn_notice").css("color","rgb(193 61 51)");
+        $("#turn_notice").fadeIn();
+    }
+
+    if(isThirdMove === true){
+        $("#map").css("filter","blur(3px)");
+        $("#turn_notice").html("友軍回合");
+        $("#turn_notice").css("color","rgb(226 179 36)");
+        $("#turn_notice").fadeIn();
+    }
+
+
+    setTimeout(function() {
+        $("#map").css("filter","none");
+        $("#turn_notice").hide();
+    }, 1000);
+
+    await delay(1000);
 }
 
 

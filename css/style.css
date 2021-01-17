@@ -121,6 +121,23 @@ body {
   padding-top: 20px;
 }
 
+
+
+#turn_notice {
+  position: absolute;
+  top: 50%;
+  left: 47%;
+  -webkit-transform: translate(-50%, -50%);
+  -moz-transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  -o-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+  font-family: 'Noto Serif JP', serif;
+  font-size: 45px;
+  display: none;
+}
+
+
 .mapbox {
   width: 40px;
   height: 40px;
