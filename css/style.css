@@ -135,6 +135,9 @@ body {
   font-family: 'Noto Serif JP', serif;
   font-size: 45px;
   display: none;
+  color: white;
+  padding: 0 20px;
+  border-radius: 15px;
 }
 
 
@@ -145,12 +148,22 @@ body {
   border: 1px solid #8e8e8ede;
   vertical-align: top;
   /* background-color: transparent !important; */
-   background-color: lavender;
+  /* background-color: lavender;*/
+
+  background-image: url(../assets/wall.png);
+  background-attachment: fixed;
 }
 
 .mapbox img{
   width: 36px;
   height: 36px;
+}
+
+.box_layer{
+  /*background-color: #5e8bebb5;*/
+  position: absolute;
+  width: 38px;
+  height: 38px;
 }
 
 .map-row {
@@ -162,7 +175,7 @@ body {
 }
 
 .box-is-ai{
-  border: 2px solid  #9a2f2f;
+  border: 2px solid #9a2f2f !important;
 }
 
 .box-is-player{
@@ -170,7 +183,7 @@ body {
 }
 
 .box-is-third{
-  border: 2px solid #ffe12e;
+  border: 2px solid #ffe12e !important;
 }
 
 

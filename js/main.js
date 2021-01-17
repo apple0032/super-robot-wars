@@ -2,7 +2,7 @@ var mainBGM = new Audio('./assets/bgm/srt_f_033.mp3');
 var clickSound = new Audio('./assets/soundeffect/click.mp3');
 var animationTime = 300;
 var movingTime = 500;
-var mapSize = 27;
+var mapSize = 30;
 var turn = 1;
 
 var isPlayerMove;   //Player turn
@@ -11,6 +11,8 @@ var focusRobot;
 
 var isAiMove = false;   //Enemy turn
 var isThirdMove = false;     //Third power turn
+
+var show_map_border = true;
 
 $("#newGameBtn").on("click", function() {
     ckSound();
@@ -58,6 +60,7 @@ function createMap(size = 12){
        mapHTML += '<div class="map-row data-row-'+i+'">';
         for (j = 1; j <= col; j++) {
             mapHTML += '<div class="mapbox data-box-'+j+'-'+i+'">';
+            mapHTML += '<div class="box_layer"></div>';
             mapHTML += '<div class="developer-coordinate">'+j+'-'+i+'</div>';
             mapHTML += '</div>'
         }
@@ -70,25 +73,30 @@ function createMap(size = 12){
         mapHTML += '<div id="MapViewer" style="height: '+viewerHeight+'px; ">';
         mapHTML += '<i class="fas fa-dice" data-toggle="tooltip" title="現在回合"></i><br>';
         mapHTML += '<div class="turn_number">'+turn+'</div>';
-        mapHTML += '<br>';
+        mapHTML += '<br><br>';
         mapHTML += '<i class="fas fa-chess-knight" data-toggle="tooltip" title="我方行動"></i><br>';
         mapHTML += '<div class="move_remain"></div>';
-        mapHTML += '<br>';
+        mapHTML += '<br><br>';
         mapHTML += '<i class="fas fa-chess-king" data-toggle="tooltip" title="我方兵力"></i><br>';
         mapHTML += '<div class="player_robot_remain"></div>';
-        mapHTML += '<br>';
+        mapHTML += '<br><br>';
         mapHTML += '<i class="fas fa-chess-rook" data-toggle="tooltip" title="敵方兵力"></i><br>';
         mapHTML += '<div class="ai_robot_remain"></div>';
-        mapHTML += '<br>';
+        mapHTML += '<br><br>';
         if ('third' in robot) {
-            mapHTML += '<i class="fas fa-chess-queen" data-toggle="tooltip" title="第三勢力"></i><br>';
+            mapHTML += '<i class="fas fa-chess-queen" data-toggle="tooltip" title="友軍勢力"></i><br>';
             mapHTML += '<div class="third_robot_remain"></div>';
         }
+        mapHTML += '<br><br>';
+        mapHTML += '<i class="far fa-check-square" data-toggle="tooltip" title="顯示格線"></i><br>';
+        mapHTML += '<div class="show_map_border"></div>';
         mapHTML += '</div>';
     mapHTML += '</div>';
 
-    $("#map").html(mapHTML);
-    $('[data-toggle="tooltip"]').tooltip();
+    $("#map").html(mapHTML); //Display the map HTML
+
+    $('[data-toggle="tooltip"]').tooltip();  //display tooltip
+
 }
 
 
@@ -108,7 +116,7 @@ function placeRobot(){
                 $("."+robotPos).append("<img src='./assets/robot"+value2.robotID+".png' data-robot='"+key2+"'>");
                 $("."+robotPos).addClass("box-is-third");
             }
-                $("."+robotPos).css("background-size","cover");
+                $("."+robotPos).css("background-size","auto");
         });
     });
 
@@ -135,6 +143,7 @@ function clickBoxPlayerListener() {
             if (isDoingMove === true && (!$(this).hasClass("available_move"))) {
                 //Disable move action if 1. Doing move 2.Not inside move area
                 $(".mapbox").removeClass("available_move");
+                $(".box_layer").css("background-color","transparent");
                 $(focusRobot).removeClass("isFocused");
                 focusRobot = null;
                 isDoingMove = false;
@@ -152,6 +161,7 @@ function clickBoxPlayerListener() {
                     $('.available_move').unbind();
                     if (getRobotID($(this)) !== getRobotID(focusRobot)) {
                         $(".mapbox").removeClass("available_move");
+                        $(".box_layer").css("background-color","transparent");
                         $(".mapbox").removeClass("isFocused");
                     }
                 }
@@ -186,7 +196,8 @@ function mapViewerListener() {
             $("#MapViewer .move_remain").html("我方行動<br>"+mapData.player.player_not_moved+"/"+mapData.player.total_player_robot);
             $("#MapViewer .player_robot_remain").html("我方兵力<br>"+mapData.player.player_robot+"/"+mapData.player.total_player_robot);
             $("#MapViewer .ai_robot_remain").html("敵方兵力<br>"+mapData.ai.ai_robot+"/"+mapData.ai.total_ai_robot);
-            $("#MapViewer .third_robot_remain").html("第三勢力<br>"+mapData.third.third_robot+"/"+mapData.third.total_third_robot);
+            $("#MapViewer .third_robot_remain").html("友軍勢力<br>"+mapData.third.third_robot+"/"+mapData.third.total_third_robot);
+            $("#MapViewer .show_map_border").html("顯示格線");
         }, 100);
     });
 
@@ -194,7 +205,23 @@ function mapViewerListener() {
         updateMapViewer();
         $("#MapViewer").animate({width: "25px"}, 70 );
     });
+
+    $(".fa-check-square").unbind();
+    $(".fa-check-square").click(function(){
+        if(show_map_border === true){
+            $(".mapbox").css("border","1px solid #8e8e8ede");
+            show_map_border = false;
+            $(".fa-square").addClass("fa-check-square");
+            $(".fa-check-square").removeClass("fa-square");
+        } else {
+            $(".mapbox").css("border","none");
+            show_map_border = true;
+            $(".fa-check-square").addClass("fa-square");
+            $(".fa-square").removeClass("fa-check-square");
+        }
+    });
 }
+
 
 function action(robotEle, target = "player"){
 
@@ -266,10 +293,13 @@ function showMove(available_pos, target = "player"){
         ){  //Make sure position clicked dont have any robot or items etc....
             if(target === "player") {
                 $("." + canMovePos).addClass("available_move");
+                $("." + canMovePos +' .box_layer').css("background-color", "#5e8bebb5");
             } else if(target === "ai") {
                 $("." + canMovePos).addClass("available_move_ai");
+                $("." + canMovePos +' .box_layer').css("background-color", "#d83c2fba");
             } else {
                 $("." + canMovePos).addClass("available_move_third");
+                $("." + canMovePos +' .box_layer').css("background-color", "rgba(255, 225, 46, 0.73)");
             }
         }
     });
@@ -310,6 +340,8 @@ function robotMoveToNewPoint(movedPosEle,robotEle, target = "player") {
     $(robotEle).removeClass("box-is-player"); //因為移動了新的位置, 舊位置要移除player class, 而disable move不用因為還留在原位
     $(".mapbox").removeClass("available_move"); //clear all available move area
     $(".mapbox").removeClass("available_move_ai");
+    $(".mapbox").removeClass("available_move_third");
+    $(".box_layer").css("background-color","transparent");
 
     if(target === "ai"){
         $(robotEle).removeClass("box-is-ai");
@@ -550,11 +582,16 @@ function updateMapViewer() {
     //Update isDestroyed
     MapData = getMapInformation();
 
+    if(MapData.player.player_not_moved === 0 ) {
+        $("#MapViewer .move_remain").html("<b style='color: #ff7878'>"+MapData.player.player_not_moved+"</b>");
+    } else {
+        $("#MapViewer .move_remain").html(MapData.player.player_not_moved);
+    }
+
     $("#MapViewer .player_robot_remain").html(MapData.player.player_robot);
-    $("#MapViewer .move_remain").html(MapData.player.player_not_moved);
     $("#MapViewer .ai_robot_remain").html(MapData.ai.ai_robot);
     $("#MapViewer .third_robot_remain").html(MapData.third.third_robot);
-
+    $("#MapViewer .show_map_border").html("");
 }
 
 function getMapInformation() {
@@ -604,21 +641,21 @@ async function showTurnNotice() {
     if(isPlayerMove === true){
         $("#map").css("filter","blur(3px)");
         $("#turn_notice").html("我方回合");
-        $("#turn_notice").css("color","rgb(35 105 243)");
+        $("#turn_notice").css("background-color","rgb(35 105 243)");
         $("#turn_notice").fadeIn();
     }
 
     if(isAiMove === true){
         $("#map").css("filter","blur(3px)");
         $("#turn_notice").html("敵方回合");
-        $("#turn_notice").css("color","rgb(193 61 51)");
+        $("#turn_notice").css("background-color","rgb(193 61 51)");
         $("#turn_notice").fadeIn();
     }
 
     if(isThirdMove === true){
         $("#map").css("filter","blur(3px)");
         $("#turn_notice").html("友軍回合");
-        $("#turn_notice").css("color","rgb(226 179 36)");
+        $("#turn_notice").css("background-color","rgb(226 179 36)");
         $("#turn_notice").fadeIn();
     }
 
