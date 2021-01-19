@@ -149,14 +149,27 @@ body {
   vertical-align: top;
   /* background-color: transparent !important; */
   /* background-color: lavender;*/
+}
 
-  background-image: url(../assets/wall.png);
+.mapbox_sand1{
+  background-image: url(../assets/map/sand1.png);
+  background-attachment: fixed;
+}
+
+.mapbox_water1{
+  background-image: url(../assets/map/water1.png);
+  background-attachment: fixed;
+}
+
+.mapbox_grass1{
+  background-image: url(../assets/map/grass1.png);
   background-attachment: fixed;
 }
 
 .mapbox img{
   width: 36px;
   height: 36px;
+  filter: contrast(1);
 }
 
 .box_layer{
@@ -257,7 +270,7 @@ body {
 }
 
 .robot_moved{
-  filter:grayscale(100%);
+  filter:grayscale(100%) !important;
 }
 
 

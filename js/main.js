@@ -4,6 +4,7 @@ var animationTime = 300;
 var movingTime = 500;
 var mapSize = 30;
 var turn = 1;
+var mission = 1;
 
 var isPlayerMove;   //Player turn
 var isDoingMove = false;    //Playing selecting new position to move
@@ -82,8 +83,8 @@ function createMap(size = 12){
         mapHTML += '<br><br>';
         mapHTML += '<i class="fas fa-chess-rook" data-toggle="tooltip" title="敵方兵力"></i><br>';
         mapHTML += '<div class="ai_robot_remain"></div>';
-        mapHTML += '<br><br>';
         if ('third' in robot) {
+            mapHTML += '<br><br>';
             mapHTML += '<i class="fas fa-chess-queen" data-toggle="tooltip" title="友軍勢力"></i><br>';
             mapHTML += '<div class="third_robot_remain"></div>';
         }
@@ -97,23 +98,93 @@ function createMap(size = 12){
 
     $('[data-toggle="tooltip"]').tooltip();  //display tooltip
 
+    //Step1 : Place base map
+    var base = mapInfo[mission]["base"];
+    $(".mapbox").addClass("mapbox_"+base);
+
+    //Step2: Handle special background
+    var base_range = mapInfo[mission]["base_range"];
+    $.each( base_range, function( k1, v1 ) {
+        $.each( v1 , function( k2, v2 ) {
+            var pRangeFirst = range(parseInt(((v2.from).split(","))[0]), parseInt(((v2.to).split(","))[0]));
+            var pRangeSec = range(parseInt(((v2.from).split(","))[1]), parseInt(((v2.to).split(","))[1]));
+            var pRangeMatrix = getTwoPosMatrix(pRangeFirst,pRangeSec);
+            $.each( pRangeMatrix , function( k3, v3 ) {
+                $(".data-box-"+v3.x+"-"+v3.y).addClass("mapbox_"+k1);
+            });
+        });
+    });
+
+    //Step3: Handle object placement
+    var mapObject = mapInfo[mission]["object"];
+    $.each( mapObject, function( k1, v1 ) {
+        $.each(v1, function (k2, v2) {
+            var actualSizeX = (v2.sizeX) - 1;
+            var actualSizeY = (v2.sizeY) - 1;
+
+            if (v2.hasOwnProperty("put")) {
+                var startX = parseInt(((v2.put).split(","))[0]);
+                var startY = parseInt(((v2.put).split(","))[1]);
+
+                var newX = (startX + actualSizeX);
+                var newY = (startY + actualSizeY);
+
+                var pRangeX = range(startX, newX);
+                var pRangeY = range(startY, newY);
+
+                var pRangeMatrix = getTwoPosMatrix(pRangeX, pRangeY);
+
+                //Add box-is-item class to identify the box has item
+                $.each(pRangeMatrix, function (k3, v3) {
+                    $(".data-box-" + v3.x + "-" + v3.y).addClass("box-is-item");
+                    $(".data-box-" + v3.x + "-" + v3.y).attr('data-mapItem', k1);
+                    if (v2.pass === false) {
+                        $(".data-box-" + v3.x + "-" + v3.y).addClass("box-is-block");
+                    }
+                });
+
+                var ImgSizeX = v2.sizeX * 40;
+                var ImgSizeY = v2.sizeY * 40;
+
+                $(".data-box-" + startX + "-" + startY).prepend('<div class="map_base" style="position: absolute;"><img src="./assets/map/' + k1 + '.png" style="width: ' + ImgSizeX + 'px;height: ' + ImgSizeY + 'px;"></div>\n');
+            } else {
+                var rangeStart = range(parseInt(((v2.from).split(","))[0]), parseInt(((v2.to).split(","))[0]));
+                var rangeEnd = range(parseInt(((v2.from).split(","))[1]), parseInt(((v2.to).split(","))[1]));
+                var rangeMatrix = getTwoPosMatrix(rangeStart,rangeEnd);
+                $.each( rangeMatrix , function( k3, v3 ) {
+                    $(".data-box-"+v3.x+"-"+v3.y).addClass("box-is-item");
+                    $(".data-box-"+v3.x+"-"+v3.y).attr('data-mapItem', k1);
+                    if (v2.pass === false) {
+                        $(".data-box-" + v3.x + "-" + v3.y).addClass("box-is-block");
+                    }
+                    var ImgSizeX = v2.sizeX * 40;
+                    var ImgSizeY = v2.sizeY * 40;
+                    $(".data-box-"+v3.x+"-"+v3.y).prepend('<div class="map_base" style="position: absolute;"><img src="./assets/map/' + k1 + '.png" style="width: ' + ImgSizeX + 'px;height: ' + ImgSizeY + 'px;"></div>\n');
+                });
+            }
+        });
+    });
+
 }
 
+function range(start, end) {
+    return Array(end - start + 1).fill().map((_, idx) => start + idx)
+}
 
 function placeRobot(){
     $.each( robot, function( key, value ) {
         $.each( value, function( key2, value2 ) {
             var robotPos = "data-box-"+value2.x+"-"+value2.y;
             if(key === "ai"){
-                $("."+robotPos).append("<img src='./assets/robot"+value2.robotID+".png' data-robot='"+key2+"'>");
+                $("."+robotPos).append("<img src='./assets/robot"+value2.robotID+".png' data-robot='"+key2+"' class='is_robot'>");
                 $("."+robotPos).addClass("box-is-ai");
             }
             if(key === "player"){
-                $("."+robotPos).append("<img src='./assets/robot"+value2.robotID+".png' data-robot='"+key2+"'>");
+                $("."+robotPos).append("<img src='./assets/robot"+value2.robotID+".png' data-robot='"+key2+"' class='is_robot'>");
                 $("."+robotPos).addClass("box-is-player");
             }
             if(key === "third"){
-                $("."+robotPos).append("<img src='./assets/robot"+value2.robotID+".png' data-robot='"+key2+"'>");
+                $("."+robotPos).append("<img src='./assets/robot"+value2.robotID+".png' data-robot='"+key2+"' class='is_robot'>");
                 $("."+robotPos).addClass("box-is-third");
             }
                 $("."+robotPos).css("background-size","auto");
@@ -208,14 +279,14 @@ function mapViewerListener() {
 
     $(".fa-check-square").unbind();
     $(".fa-check-square").click(function(){
-        if(show_map_border === true){
+        if(show_map_border === false){
             $(".mapbox").css("border","1px solid #8e8e8ede");
-            show_map_border = false;
+            show_map_border = true;
             $(".fa-square").addClass("fa-check-square");
             $(".fa-check-square").removeClass("fa-square");
         } else {
             $(".mapbox").css("border","none");
-            show_map_border = true;
+            show_map_border = false;
             $(".fa-check-square").addClass("fa-square");
             $(".fa-square").removeClass("fa-check-square");
         }
@@ -289,7 +360,7 @@ function showMove(available_pos, target = "player"){
     $.each( available_pos, function( key, value ) {
         var canMovePos = "data-box-"+value.x+"-"+value.y;
         if( (!$("."+canMovePos).hasClass("box-is-player")) && (!$("."+canMovePos).hasClass("box-is-ai"))
-            && (!$("."+canMovePos).hasClass("box-is-third")) && (!$("."+canMovePos).hasClass("box-is-item"))
+            && (!$("."+canMovePos).hasClass("box-is-third")) && (!$("."+canMovePos).hasClass("box-is-block"))
         ){  //Make sure position clicked dont have any robot or items etc....
             if(target === "player") {
                 $("." + canMovePos).addClass("available_move");
@@ -325,16 +396,16 @@ function robotMoveToNewPoint(movedPosEle,robotEle, target = "player") {
     var RobotData = getRobotData(robotID,target);
 
     //Find original position
-    var xSource =  ($(robotEle).find("img"))[0].offsetLeft;
-    var ySource =  ($(robotEle).find("img"))[0].offsetTop;
+    var xSource =  ($(robotEle).find(".is_robot"))[0].offsetLeft;
+    var ySource =  ($(robotEle).find(".is_robot"))[0].offsetTop;
 
     //Find target position
     var xTarget = (movedPosEle[0].offsetLeft)+2;
     var yTarget = movedPosEle[0].offsetTop;
 
     //Add move animation
-    $(robotEle).find("img").css({"position":"absolute", "left": xSource, "top" : ySource});
-    ($(robotEle).find("img")).animate({left: xTarget, top: yTarget}, animationTime, "swing");
+    $(robotEle).find(".is_robot").css({"position":"absolute", "left": xSource, "top" : ySource});
+    ($(robotEle).find(".is_robot")).animate({left: xTarget, top: yTarget}, animationTime, "swing");
 
     $(robotEle).removeClass("isFocused"); //clear focused bot(remove orange border as well)
     $(robotEle).removeClass("box-is-player"); //因為移動了新的位置, 舊位置要移除player class, 而disable move不用因為還留在原位
@@ -353,8 +424,8 @@ function robotMoveToNewPoint(movedPosEle,robotEle, target = "player") {
 
     setTimeout(function(){
         //When finishing move
-        $(robotEle).find("img").remove(); //clear old pos robot
-        $(movedPosEle).append("<img class='robot_moved' src='./assets/robot"+RobotData.robotID+".png' data-robot='"+robotID+"'>"); //new image show //控制二回移動
+        $(robotEle).find(".is_robot").remove(); //clear old pos robot
+        $(movedPosEle).append("<img class='robot_moved is_robot' src='./assets/robot"+RobotData.robotID+".png' data-robot='"+robotID+"'>"); //new image show //控制二回移動
 
         if(target === "player") {
             $(movedPosEle).addClass("box-is-player");
@@ -487,7 +558,7 @@ async function botMovingMain(){
     await delay(200);   //Wait a moment, before start player turn
 
 
-    if(isThirdMove === false) {     //If no third group or if third robot finish their turn -> start new player turn
+    if(isThirdMove === false && isPlayerMove === false) {     //If no third group or if third robot finish their turn -> start new player turn
         isPlayerMove = true;
         resetMap(true);
         turn++;
@@ -507,17 +578,19 @@ async function aiMove() {
         //Will loop through all ai robot
         var aiRobot = robot.ai;
         for (const value of Object.keys(aiRobot)) {
+            if(isPlayerMove === false) {
+                var currentRobot = aiRobot[value];
+                var newX = (currentRobot.x) - 1;
+                var newY = (currentRobot.y) - 1;
 
-            var currentRobot = aiRobot[value];
-            var newX = (currentRobot.x) + 1;
-            var newY = (currentRobot.y) + 1;
+                action($(".data-box-" + currentRobot.x + "-" + currentRobot.y), "ai");
+                setTimeout(function () {
+                    robotMoveToNewPoint($(".data-box-" + newX + "-" + newY), $(".data-box-" + currentRobot.x + "-" + currentRobot.y), "ai");
+                }, movingTime);
 
-            action($(".data-box-"+currentRobot.x+"-"+currentRobot.y), "ai");
-            setTimeout(function(){
-                robotMoveToNewPoint($(".data-box-"+newX+"-"+newY),$(".data-box-"+currentRobot.x+"-"+currentRobot.y),"ai");
-            }, movingTime);
-
-            await delay(movingTime + 500);
+                await delay(movingTime + 500);
+                //isPlayerMove = true;
+            }
         }
 
 
@@ -706,6 +779,18 @@ function getMoveMatrix(available_pos= []){
     return matrixPos;
 }
 
+
+function getTwoPosMatrix(first= [], second = []){
+    var matrixPos = [];
+    $.each( first, function( k1, v1 ) {
+        $.each( second, function( k2, v2 ) {
+            matrixPos.push({x:v1, y:v2});
+        });
+    });
+
+    return matrixPos;
+}
+
 function getRobotStatus(robotID){
     var robotStatus = robot.player[robotID]["isMoved"];
     return robotStatus;
@@ -725,7 +810,7 @@ function resetPlayerRobotStatus(){
 }
 
 function getRobotID($element){
-    var robotID = $element.find('img').attr('data-robot');
+    var robotID = $element.find('.is_robot').attr('data-robot');
     return robotID;
 }
 
@@ -819,13 +904,14 @@ var robot = {
         'robotID_6': {x:5, y:4, robotID: 6, moveLevel : 4, isMoved: false, isDestroyed : false}
     },
     'ai':{
-        'robotID_4_1' : {x:15, y:12, robotID: 4, moveLevel : 4, isMoved: false, isDestroyed : false},
-        'robotID_4_2' : {x:16, y:11, robotID: 4, moveLevel : 4, isMoved: false, isDestroyed : false},
-        'robotID_4_3' : {x:17, y:11, robotID: 4, moveLevel : 4, isMoved: false, isDestroyed : false},
-        'robotID_4_4' : {x:18, y:12, robotID: 4, moveLevel : 4, isMoved: false, isDestroyed : false},
+        'robotID_4_1' : {x:23, y:18, robotID: 4, moveLevel : 4, isMoved: false, isDestroyed : false},
+        'robotID_4_2' : {x:24, y:17, robotID: 4, moveLevel : 4, isMoved: false, isDestroyed : false},
+        'robotID_4_3' : {x:25, y:17, robotID: 4, moveLevel : 4, isMoved: false, isDestroyed : false},
+        'robotID_4_4' : {x:26, y:18, robotID: 4, moveLevel : 4, isMoved: false, isDestroyed : false},
     },
     'third':{
         'robotID_4_1' : {x:25, y:2, robotID: 8, moveLevel : 5, isMoved: false, isDestroyed : false},
         'robotID_4_2' : {x:26, y:3, robotID: 9, moveLevel : 7, isMoved: false, isDestroyed : false}
     }
 };
+
