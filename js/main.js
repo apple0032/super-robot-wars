@@ -126,22 +126,34 @@ function createMap(size = 12){
                 var startX = parseInt(((v2.put).split(","))[0]);
                 var startY = parseInt(((v2.put).split(","))[1]);
 
-                var newX = (startX + actualSizeX);
-                var newY = (startY + actualSizeY);
+                if (v2.hasOwnProperty("boxes")) {
+                    $.each(v2.boxes, function (k3, v3) {
+                        var absX = parseInt(((v3).split(","))[0]);
+                        var absY = parseInt(((v3).split(","))[1]);
+                        $(".data-box-" + absX + "-" + absY).addClass("box-is-item");
+                        $(".data-box-" + absX + "-" + absY).attr('data-mapItem', k1);
+                        if (v2.pass === false) {
+                            $(".data-box-" + absX + "-" + absY).addClass("box-is-block");
+                        }
+                    });
+                } else {
+                    var newX = (startX + actualSizeX);
+                    var newY = (startY + actualSizeY);
 
-                var pRangeX = range(startX, newX);
-                var pRangeY = range(startY, newY);
+                    var pRangeX = range(startX, newX);
+                    var pRangeY = range(startY, newY);
 
-                var pRangeMatrix = getTwoPosMatrix(pRangeX, pRangeY);
+                    var pRangeMatrix = getTwoPosMatrix(pRangeX, pRangeY);
 
-                //Add box-is-item class to identify the box has item
-                $.each(pRangeMatrix, function (k3, v3) {
-                    $(".data-box-" + v3.x + "-" + v3.y).addClass("box-is-item");
-                    $(".data-box-" + v3.x + "-" + v3.y).attr('data-mapItem', k1);
-                    if (v2.pass === false) {
-                        $(".data-box-" + v3.x + "-" + v3.y).addClass("box-is-block");
-                    }
-                });
+                    //Add box-is-item class to identify the box has item
+                    $.each(pRangeMatrix, function (k3, v3) {
+                        $(".data-box-" + v3.x + "-" + v3.y).addClass("box-is-item");
+                        $(".data-box-" + v3.x + "-" + v3.y).attr('data-mapItem', k1);
+                        if (v2.pass === false) {
+                            $(".data-box-" + v3.x + "-" + v3.y).addClass("box-is-block");
+                        }
+                    });
+                }
 
                 var ImgSizeX = v2.sizeX * 40;
                 var ImgSizeY = v2.sizeY * 40;
