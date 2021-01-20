@@ -10,6 +10,14 @@ var mapInfo = {
         {
           "from" : "5,16",
           "to" : "11,20"
+        },
+        {
+          "from" : "1,4",
+          "to" : "30,5"
+        },
+        {
+          "from" : "1,15",
+          "to" : "30,17"
         }
       ],
       "water1" : [
@@ -31,6 +39,12 @@ var mapInfo = {
           "put" : "5,17",
           "sizeX" : 3,
           "sizeY" : 3,
+          "pass" : true,
+        },
+        {
+          "put" : "25,5",
+          "sizeX" : 2,
+          "sizeY" : 2,
           "pass" : true,
         },
         {
@@ -68,6 +82,15 @@ var mapInfo = {
           "sizeX" : 3,
           "sizeY" : 3,
           "pass" : true,
+          "effect" : {}
+        }
+      ],
+      "rock3" : [
+        {
+          "put" : "14,9",
+          "sizeX" : 6,
+          "sizeY" : 4,
+          "pass" : false,
           "effect" : {}
         }
       ]

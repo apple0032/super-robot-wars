@@ -188,15 +188,15 @@ body {
 }
 
 .box-is-ai{
-  border: 2px solid #9a2f2f !important;
+  border: 2px solid #9a2f2fb8 !important;
 }
 
 .box-is-player{
-  border: 2px solid blue !important;
+  border: 2px solid #4242bfde !important;
 }
 
 .box-is-third{
-  border: 2px solid #ffe12e !important;
+  border: 2px solid #e6ca2375 !important;
 }
 
 

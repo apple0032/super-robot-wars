@@ -89,7 +89,7 @@ function createMap(size = 12){
             mapHTML += '<div class="third_robot_remain"></div>';
         }
         mapHTML += '<br><br>';
-        mapHTML += '<i class="far fa-check-square" data-toggle="tooltip" title="顯示格線"></i><br>';
+        mapHTML += '<i class="fas fa-border-all" data-toggle="tooltip" title="顯示格線"></i><br>';
         mapHTML += '<div class="show_map_border"></div>';
         mapHTML += '</div>';
     mapHTML += '</div>';
@@ -277,20 +277,21 @@ function mapViewerListener() {
         $("#MapViewer").animate({width: "25px"}, 70 );
     });
 
-    $(".fa-check-square").unbind();
-    $(".fa-check-square").click(function(){
+    $(".fa-border-all").unbind();
+    $(".fa-border-all").click(function(){
         if(show_map_border === false){
             $(".mapbox").css("border","1px solid #8e8e8ede");
             show_map_border = true;
-            $(".fa-square").addClass("fa-check-square");
-            $(".fa-check-square").removeClass("fa-square");
+            $(".fa-border-none").addClass("fa-border-all");
+            $(".fa-border-all").removeClass("fa-border-none");
         } else {
             $(".mapbox").css("border","none");
             show_map_border = false;
-            $(".fa-check-square").addClass("fa-square");
-            $(".fa-square").removeClass("fa-check-square");
+            $(".fa-border-all").addClass("fa-border-none");
+            $(".fa-border-none").removeClass("fa-border-all");
         }
     });
+
 }
 
 
@@ -580,8 +581,11 @@ async function aiMove() {
         for (const value of Object.keys(aiRobot)) {
             if(isPlayerMove === false) {
                 var currentRobot = aiRobot[value];
-                var newX = (currentRobot.x) - 1;
-                var newY = (currentRobot.y) - 1;
+
+
+
+                var newX = (currentRobot.x) - 2;
+                var newY = (currentRobot.y) - 2;
 
                 action($(".data-box-" + currentRobot.x + "-" + currentRobot.y), "ai");
                 setTimeout(function () {
@@ -611,16 +615,35 @@ async function thirdMove() {
 
     const thirdMoving = async () => {
         if(isAiMove === false) {    //Check if all AI done moving
+
+            /*
             action($(".data-box-25-2"), "third");
             setTimeout(function () {
-                robotMoveToNewPoint($(".data-box-21-2"), $(".data-box-25-2"), "third");
+                robotMoveToNewPoint($(".data-box-6-3"), $(".data-box-25-2"), "third");
             }, movingTime);
 
             await delay(movingTime + 300);
+            */
+            var thirdRobot = robot.third;
+            for (const value of Object.keys(thirdRobot)) {
+                if(isPlayerMove === false) {
+                    var currentRobot = thirdRobot[value];
+                    var newX = (currentRobot.x) - 3;
+                    var newY = (currentRobot.y);
+
+                    action($(".data-box-" + currentRobot.x + "-" + currentRobot.y), "third");
+                    setTimeout(function () {
+                        robotMoveToNewPoint($(".data-box-" + newX + "-" + newY), $(".data-box-" + currentRobot.x + "-" + currentRobot.y), "third");
+                    }, movingTime);
+
+                    await delay(movingTime + 500);
+                    //isPlayerMove = true;
+                }
+            }
 
 
 
-
+            await delay(movingTime + 100);
             //Check if all third robot done action
             isThirdMove = false;
         }
@@ -664,7 +687,7 @@ function updateMapViewer() {
     $("#MapViewer .player_robot_remain").html(MapData.player.player_robot);
     $("#MapViewer .ai_robot_remain").html(MapData.ai.ai_robot);
     $("#MapViewer .third_robot_remain").html(MapData.third.third_robot);
-    $("#MapViewer .show_map_border").html("");
+    $("#MapViewer .show_map_border").html('');
 }
 
 function getMapInformation() {
@@ -900,7 +923,7 @@ var robot = {
         'robotID_3_1' : {x:2, y:2, robotID: 7, moveLevel : 25, isMoved: false, isDestroyed : false},
         'robotID_3_2' : {x:3, y:3, robotID: 3, moveLevel : 3, isMoved: false, isDestroyed : false},
         'robotID_5_1' : {x:3, y:4, robotID: 5, moveLevel : 3, isMoved: false, isDestroyed : false},
-        'robotID_5_2' : {x:2, y:5, robotID: 5, moveLevel : 3, isMoved: false, isDestroyed : false},
+        'robotID_5_2' : {x:2, y:5, robotID: 10, moveLevel : 3, isMoved: false, isDestroyed : false},
         'robotID_6': {x:5, y:4, robotID: 6, moveLevel : 4, isMoved: false, isDestroyed : false}
     },
     'ai':{
