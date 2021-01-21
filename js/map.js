@@ -49,7 +49,7 @@ var mapInfo = {
         },
         {
           "from" : "6,17",
-          "to" : "10,19",
+          "to" : "11,19",
           "sizeX" : 2,
           "sizeY" : 2,
           "pass" : false,
@@ -88,13 +88,22 @@ var mapInfo = {
       "rock3" : [
         {
           "put" : "17,9",
-          "sizeX" : 6,
+          "sizeX" : 7,
           "sizeY" : 4,
           "pass" : false,
           "boxes" : ["18,11","18,12","19,11","19,12","20,11","20,12"],
           "effect" : {}
         }
-      ]
+      ],
+      // "core1" :[
+      //   {
+      //     "put" : "3,6",
+      //     "sizeX" : 16,
+      //     "sizeY" : 10,
+      //     "pass" : false,
+      //     "effect" : {}
+      //   }
+      // ]
     }
   }
 };

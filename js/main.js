@@ -304,6 +304,41 @@ function mapViewerListener() {
         }
     });
 
+    $(".box-is-ai").unbind();
+    if(isPlayerMove === true) {
+        $(".box-is-ai").hover(function () {
+
+            var robotID = getRobotID($(this));
+            var RobotData = getRobotData(robotID, "ai");
+
+            var available_pos = getAvailableCoordinate(RobotData.x, RobotData.y, RobotData.moveLevel);
+            showMove(available_pos, "ai");
+        });
+
+        $(".box-is-ai").mouseleave(function () {
+            //Remove previous hover
+            $(".mapbox").removeClass("available_move_ai");
+            $(".box_layer").css("background-color", "transparent");
+        });
+    }
+
+    $(".box-is-third").unbind();
+    if(isPlayerMove === true) {
+        $(".box-is-third").hover(function () {
+
+            var robotID = getRobotID($(this));
+            var RobotData = getRobotData(robotID, "third");
+
+            var available_pos = getAvailableCoordinate(RobotData.x, RobotData.y, RobotData.moveLevel);
+            showMove(available_pos, "third");
+        });
+
+        $(".box-is-third").mouseleave(function () {
+            //Remove previous hover
+            $(".mapbox").removeClass("available_move_third");
+            $(".box_layer").css("background-color", "transparent");
+        });
+    }
 }
 
 
@@ -320,46 +355,7 @@ function action(robotEle, target = "player"){
     var RobotData = getRobotData(robotID,target);
 
     var moveLevel = RobotData.moveLevel;
-    var avail_coordinate = [];
-
-    var available_pos = [];
-    avail_coordinate.push(focus_robot_x);
-    avail_coordinate.push(focus_robot_y);
-    for (i = 1; i <= moveLevel; i++) {
-        available_pos.push({x: parseInt(focus_robot_x), y:parseInt(focus_robot_y) + i});
-        available_pos.push({x: parseInt(focus_robot_x), y:parseInt(focus_robot_y) - i});
-        avail_coordinate.push(parseInt(focus_robot_y) + i);
-        avail_coordinate.push(parseInt(focus_robot_y) - i);
-    }
-    for (i = 1; i <= moveLevel; i++) {
-        available_pos.push({x: parseInt(focus_robot_x) + i , y:parseInt(focus_robot_y)});
-        available_pos.push({x: parseInt(focus_robot_x) - i, y:parseInt(focus_robot_y)});
-        avail_coordinate.push(parseInt(focus_robot_x) + i);
-        avail_coordinate.push(parseInt(focus_robot_x) - i);
-    }
-    avail_coordinate = avail_coordinate.filter(onlyUnique);
-    var matrixPos = getMoveMatrix(avail_coordinate);
-
-    $.each( matrixPos, function( key, value ) {
-        var distance_x;
-        var distance_y;
-        if(focus_robot_x > value.x){
-            distance_x = (focus_robot_x - value.x);
-        } else {
-            distance_x = (value.x - focus_robot_x);
-        }
-
-        if(focus_robot_y > value.y){
-            distance_y = (focus_robot_y - value.y);
-        } else {
-            distance_y = (value.y - focus_robot_y);
-        }
-
-        distance = distance_x + distance_y;
-        if(distance <= moveLevel){
-            available_pos.push({x: value.x  , y:value.y});
-        }
-    });
+    var available_pos = getAvailableCoordinate(focus_robot_x,focus_robot_y, moveLevel);
 
     showMove(available_pos, target);
 
@@ -388,7 +384,9 @@ function showMove(available_pos, target = "player"){
         }
     });
 
-    isDoingMove = true;
+    if(target === "player") {
+        isDoingMove = true;
+    }
 }
 
 function moveListener() {
@@ -557,7 +555,7 @@ async function botMovingMain(){
 
     //1. Player always move first, listen for end turn event
 
-    //2. Bot move turn
+    //2. AI Bot move turn
     await aiMove();
     await delay(500);   //AI回合end, wait a moment....
 
@@ -593,18 +591,46 @@ async function aiMove() {
         for (const value of Object.keys(aiRobot)) {
             if(isPlayerMove === false) {
                 var currentRobot = aiRobot[value];
+                var targetRobot = robot.player.robotID_6;
+
+                //1.Find attack target, if yes stop moving, do attack
+                var canAttack = getRobotCanAttack(currentRobot,"ai");
 
 
+                //2.Find move pos
+                if(canAttack === false) {
+                    //Find all available POS
+                    var available_pos = getAvailableCoordinate(currentRobot.x, currentRobot.y, currentRobot.moveLevel);
+                    var moveCoordinateByTarget = getMoveCoordinateByTarget(available_pos, targetRobot.x, targetRobot.y);
+                    moveCoordinateByTarget.sort(sortByX);
 
-                var newX = (currentRobot.x) - 2;
-                var newY = (currentRobot.y) - 2;
+                    var distanceX = (currentRobot.x - targetRobot.x);
+                    var distanceY = (currentRobot.y - targetRobot.y);
+                    if( ((distanceX * distanceX) + (distanceY * distanceY)) > 1 ) { //If the distance = 1 (ie, they stand each other)
+                        var newX, newY;
+                        if ((distanceX > 2 || distanceX < -2) || ((distanceY > 2 || distanceY < -2))) {    //斜行
+                            moveCoordinateByTarget = getMiddle(moveCoordinateByTarget, 0);
+                            newX = moveCoordinateByTarget.x;
+                            newY = moveCoordinateByTarget.y;
+                        } else { //直行
+                            newX = moveCoordinateByTarget[0].x;
+                            newY = moveCoordinateByTarget[0].y;
+                        }
+                        action($(".data-box-" + currentRobot.x + "-" + currentRobot.y), "ai");
+                        setTimeout(function () {
+                            robotMoveToNewPoint($(".data-box-" + newX + "-" + newY), $(".data-box-" + currentRobot.x + "-" + currentRobot.y), "ai");
+                        }, movingTime);
+                    } else {
+                        setTimeout(function () {
+                            robotMoveToNewPoint($(".data-box-" + currentRobot.x + "-" + currentRobot.y), $(".data-box-" + currentRobot.x + "-" + currentRobot.y), "ai");
+                        }, movingTime);
+                    }
+                }
 
-                action($(".data-box-" + currentRobot.x + "-" + currentRobot.y), "ai");
-                setTimeout(function () {
-                    robotMoveToNewPoint($(".data-box-" + newX + "-" + newY), $(".data-box-" + currentRobot.x + "-" + currentRobot.y), "ai");
-                }, movingTime);
+
 
                 await delay(movingTime + 500);
+
                 //isPlayerMove = true;
             }
         }
@@ -795,6 +821,12 @@ function resetMap(resetRobotStatus = false) {
     }
 }
 
+function getRobotCanAttack(robot, target = "player") {
+    //ll(robot);
+
+    return false;
+}
+
 function getCoordinateByEle(ele) {
     var coordinate = ele.find(".developer-coordinate");
     coordinate = coordinate.html();
@@ -802,6 +834,133 @@ function getCoordinateByEle(ele) {
     return coordinate.split("-");
 }
 
+function getMoveCoordinateByTarget(available_pos, targetX, targetY) {
+    var minDistanceArr = [];
+    var minDistance = 45; //45 is the biggest distance of a 30X20 map
+    var tempAvailablePosArr = {};
+    var availablePos = [];
+
+    $.each( available_pos, function( key, value ) {
+        var distance_x;
+        var distance_y;
+        if(targetX > value.x){
+            distance_x = (targetX - value.x);
+        } else {
+            distance_x = (value.x - targetX);
+        }
+
+        if(targetY > value.y){
+            distance_y = (targetY - value.y);
+        } else {
+            distance_y = (value.y - targetY);
+        }
+
+        var distance = distance_x + distance_y;
+        if(distance < minDistance){
+            minDistance = distance;
+        }
+
+        if (distance in tempAvailablePosArr) {
+            tempAvailablePosArr[distance].push(value);
+        } else {
+            tempAvailablePosArr[distance] = [];
+            tempAvailablePosArr[distance].push(value);
+        }
+    });
+
+    availablePos = tempAvailablePosArr[minDistance];
+    availablePos = getUniqueArray(availablePos);
+
+    return availablePos;
+}
+
+function getUniqueArray(array){
+    var arr = {}
+    arr["objects"] = array;
+
+    const uniqueArray = arr.objects.filter((objects, index) => {
+        const _objects = JSON.stringify(objects);
+        return index === arr.objects.findIndex(obj => {
+            return JSON.stringify(obj) === _objects;
+        });
+    });
+
+    return uniqueArray;
+}
+
+function sortByX( a, b ) {
+    if ( a.x < b.x ){
+        return -1;
+    }
+    if ( a.x > b.x ){
+        return 1;
+    }
+    return 0;
+}
+
+
+function getMiddle(array, i = 0) {
+    if (i * 2 + 2 in array) return getMiddle( array, i + 1 )
+    else return array[i];
+}
+
+
+function getAvailableCoordinate(eleX, eleY, moveLevel) {
+    var avail_coordinate = [];
+    var available_pos = [];
+    avail_coordinate.push(eleX);
+    avail_coordinate.push(eleY);
+    for (i = 1; i <= moveLevel; i++) {
+        available_pos.push({x: parseInt(eleX), y:parseInt(eleY) + i});
+        available_pos.push({x: parseInt(eleX), y:parseInt(eleY) - i});
+        avail_coordinate.push(parseInt(eleY) + i);
+        avail_coordinate.push(parseInt(eleY) - i);
+    }
+    for (i = 1; i <= moveLevel; i++) {
+        available_pos.push({x: parseInt(eleX) + i , y:parseInt(eleY)});
+        available_pos.push({x: parseInt(eleX) - i, y:parseInt(eleY)});
+        avail_coordinate.push(parseInt(eleX) + i);
+        avail_coordinate.push(parseInt(eleX) - i);
+    }
+    avail_coordinate = avail_coordinate.filter(onlyUnique);
+    var matrixPos = getMoveMatrix(avail_coordinate);
+
+    $.each( matrixPos, function( key, value ) {
+        var distance_x;
+        var distance_y;
+        if(eleX > value.x){
+            distance_x = (eleX - value.x);
+        } else {
+            distance_x = (value.x - eleX);
+        }
+
+        if(eleY > value.y){
+            distance_y = (eleY - value.y);
+        } else {
+            distance_y = (value.y - eleY);
+        }
+
+        var distance = distance_x + distance_y;
+        if(distance <= moveLevel){
+            available_pos.push({x: value.x  , y:value.y});
+        }
+    });
+
+    available_pos = getUniqueArray(available_pos);
+
+    //Filter all not allowed pos
+    var newAvailable_pos = [];
+    $.each( available_pos, function( key, value ) {
+        var ele = $(".data-box-" + value.x + "-" + value.y);
+        if( (!ele.hasClass("box-is-player")) && (!ele.hasClass("box-is-ai")) &&
+            (!ele.hasClass("box-is-third")) && (!ele.hasClass("box-is-block")) && (ele.length > 0)
+        ){
+            newAvailable_pos.push(value);
+        }
+    });
+
+    return newAvailable_pos;
+}
 
 function getMoveMatrix(available_pos= []){
     var matrixPos = [];
@@ -929,24 +1088,4 @@ function ll(log){
     console.log(log);
 }
 
-
-var robot = {
-    'player':{
-        'robotID_3_1' : {x:2, y:2, robotID: 7, moveLevel : 25, isMoved: false, isDestroyed : false},
-        'robotID_3_2' : {x:3, y:3, robotID: 3, moveLevel : 3, isMoved: false, isDestroyed : false},
-        'robotID_5_1' : {x:3, y:4, robotID: 5, moveLevel : 3, isMoved: false, isDestroyed : false},
-        'robotID_5_2' : {x:2, y:5, robotID: 10, moveLevel : 3, isMoved: false, isDestroyed : false},
-        'robotID_6': {x:5, y:4, robotID: 6, moveLevel : 4, isMoved: false, isDestroyed : false}
-    },
-    'ai':{
-        'robotID_4_1' : {x:23, y:18, robotID: 4, moveLevel : 4, isMoved: false, isDestroyed : false},
-        'robotID_4_2' : {x:24, y:17, robotID: 4, moveLevel : 4, isMoved: false, isDestroyed : false},
-        'robotID_4_3' : {x:25, y:17, robotID: 4, moveLevel : 4, isMoved: false, isDestroyed : false},
-        'robotID_4_4' : {x:26, y:18, robotID: 4, moveLevel : 4, isMoved: false, isDestroyed : false},
-    },
-    'third':{
-        'robotID_4_1' : {x:25, y:2, robotID: 8, moveLevel : 5, isMoved: false, isDestroyed : false},
-        'robotID_4_2' : {x:26, y:3, robotID: 9, moveLevel : 7, isMoved: false, isDestroyed : false}
-    }
-};
 
