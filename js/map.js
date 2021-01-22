@@ -92,7 +92,19 @@ var mapInfo = {
           "sizeY" : 4,
           "pass" : false,
           "boxes" : ["18,11","18,12","19,11","19,12","20,11","20,12"],
+          "copy" : false,
           "effect" : {}
+        }
+      ],
+
+      "rock1" : [
+        {
+          "put" : "9,5",
+          "sizeX" : 1,
+          "sizeY" : 1,
+          "pass" : false,
+          "boxes" : ["9,5","10,4"],
+          "copy" : true
         }
       ],
       // "core1" :[
