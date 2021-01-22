@@ -916,6 +916,7 @@ function getMiddle(array, i = 0) {
 
 
 function getAvailableCoordinate(eleX, eleY, moveLevel) {
+    var currentPos = [{x: eleX, y: eleY}];
     var avail_coordinate = [];
     var available_pos = [];
     avail_coordinate.push(eleX);
@@ -979,7 +980,7 @@ function getAvailableCoordinate(eleX, eleY, moveLevel) {
                 ((eleTop.hasClass("box-is-ai")) || (eleTop.hasClass("box-is-block")) || (eleTop.hasClass("box-is-third"))) &&
                 ((eleDown.hasClass("box-is-ai")) || (eleDown.hasClass("box-is-block")) || (eleDown.hasClass("box-is-third")))
             ) {
-                return null;
+                return currentPos;
             }
         } else {
             if (((eleLeft.hasClass("box-is-ai")) || (eleLeft.hasClass("box-is-block"))  ) &&
@@ -987,7 +988,7 @@ function getAvailableCoordinate(eleX, eleY, moveLevel) {
                 ((eleTop.hasClass("box-is-ai")) || (eleTop.hasClass("box-is-block")) ) &&
                 ((eleDown.hasClass("box-is-ai")) || (eleDown.hasClass("box-is-block")) )
             ) {
-                return null;
+                return currentPos;
             }
         }
     }
@@ -999,7 +1000,7 @@ function getAvailableCoordinate(eleX, eleY, moveLevel) {
                 ((eleTop.hasClass("box-is-player")) || (eleTop.hasClass("box-is-block")) ) &&
                 ((eleDown.hasClass("box-is-player")) || (eleDown.hasClass("box-is-block")) )
             ) {
-                return null;
+                return currentPos;
             }
         } else {
             if(eleType === "ai") {
@@ -1008,7 +1009,7 @@ function getAvailableCoordinate(eleX, eleY, moveLevel) {
                     ((eleTop.hasClass("box-is-player")) || (eleTop.hasClass("box-is-block")) || (eleTop.hasClass("box-is-third"))) &&
                     ((eleDown.hasClass("box-is-player")) || (eleDown.hasClass("box-is-block")) || (eleDown.hasClass("box-is-third")))
                 ) {
-                    return null;
+                    return currentPos;
                 }
             } else {
                 if (((eleLeft.hasClass("box-is-player")) || (eleLeft.hasClass("box-is-block")) || (eleLeft.hasClass("box-is-ai"))) &&
@@ -1016,7 +1017,7 @@ function getAvailableCoordinate(eleX, eleY, moveLevel) {
                     ((eleTop.hasClass("box-is-player")) || (eleTop.hasClass("box-is-block")) || (eleTop.hasClass("box-is-ai"))) &&
                     ((eleDown.hasClass("box-is-player")) || (eleDown.hasClass("box-is-block")) || (eleDown.hasClass("box-is-ai")))
                 ) {
-                    return null;
+                    return currentPos;
                 }
             }
         }
