@@ -18,6 +18,13 @@ var show_map_border = true;
 $("#newGameBtn").on("click", function() {
     ckSound();
     if ($(event.target).attr("id") === "newGameBtn") {
+
+        if($(window).width() < 1300){
+            $(".warning-notice").show();
+            return;
+        } else {
+            $(".warning-notice").hide();
+        }
         //mainBGM.play();
 
         $("#newGameBtn, #loadGameBtn , #main-header").css("display", "none");
@@ -1147,10 +1154,19 @@ function getRobotType(ele){
 
 
 
+//Listen for screen width size
+$(window).on('resize', function(){
+    var win = $(this);
+    if (win.width() < 1300) {
+        $("#map").hide();
+        $(".warning-notice").show();
+    } else {
+        $(".warning-notice").hide();
+        $("#map").show();
+    }
+});
 
-
-
-
+//Listen for error
 window.onerror = function(error, url, line) {
     ll("error occur!");
 };

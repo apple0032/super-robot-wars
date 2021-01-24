@@ -323,6 +323,94 @@ body {
 }
 
 
+/**** Screen width listener*/
+.warning-notice{
+  display: none;
+}
+
+.message {
+  background: #eee;
+  box-shadow: 4px 4px 8px 0px rgba(0, 0, 0, 0.31);
+  border-radius: 1em;
+  overflow: hidden;
+  display: flex;
+  flex-wrap: wrap;
+  max-width: 40em;
+  margin: 2em auto;
+}
+.message header {
+  background: #9E9E9E;
+  width: 100%;
+  padding: 0.5em;
+}
+.message i:after {
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+  content: "";
+  font-style: normal;
+  color: #eee;
+  background: #353535;
+  padding: 1em 0.75em;
+  font-size: 1.25em;
+  display: block;
+  width: 2.5em;
+  height: 100%;
+  text-align: center;
+}
+.message h2 {
+  margin: 0.75em;
+  font-size: 1.25em;
+  position: relative;
+  display: block;
+  width: calc(100% - 2.5em - 1.5em);
+}
+.message h2 span {
+  color: #9E9E9E;
+}
+.message h2:after {
+  content: "";
+  border-bottom: 0.1em solid #9E9E9E;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.error header {
+  background: #D50000;
+}
+.error i:after {
+  background: #3d1d1d;
+  color: #ff5656;
+  content: "";
+}
+.error h2 span {
+  color: #D50000;
+}
+.error h2:after {
+  border-bottom: 0.1em solid #D50000;
+}
+
+.warning header {
+  background: #FF6F00;
+}
+.warning i:after {
+  background: #432e1d;
+  color: #ffb780;
+  content: "";
+}
+
+.warning h2{
+  font-family: 'Noto Serif JP', serif;
+}
+
+.warning h2 span {
+  color: #FF6F00;
+}
+
+
+
 
 .developer-coordinate{
   font-weight: bold;
