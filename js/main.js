@@ -5,6 +5,7 @@ var movingTime = 500;
 var mapSize = 30;
 var turn = 1;
 var mission = 1;
+var dialogCount = 0;
 
 var isPlayerMove;   //Player turn
 var isDoingMove = false;    //Playing selecting new position to move
@@ -30,22 +31,65 @@ $("#newGameBtn").on("click", function() {
         $("#newGameBtn, #loadGameBtn , #main-header").css("display", "none");
         $("#map").css("display", "inline-block");
 
-        //Default player move first
-        isPlayerMove = true;
 
         //Game start
         createMap(mapSize);
         placeRobot();
-        activeMainMenuListener();
-        updateMapViewer();
-        showTurnNotice();
-
-        //Test AI auto moving
-
-        //botMovingMain();
+        loadOpeningDialog("opening");
 
     }
 });
+
+function loadOpeningDialog(type) {
+
+    const running = () => {
+        //Default player move first
+        isPlayerMove = true;
+        clickBoxPlayerListener();
+        activeMainMenuListener();
+        updateMapViewer();
+        showTurnNotice();
+        $(".dialog").unbind();
+        dialogCount = 0;
+    };
+
+    $("#mapDialog").html("");
+
+    if (type === "opening") {
+        if (dialog[mission].hasOwnProperty("opening") && ((dialog[mission]["opening"]).length) !== 0 ) {
+            if (dialogCount < ((dialog[mission]["opening"]).length)) {
+                dialogHTMLShow = dialogHTML.replace("#dialogType", "opening");
+                dialogHTMLShow = dialogHTMLShow.replace("#speaker", dialog[mission]["opening"][dialogCount]["name"]);
+                dialogHTMLShow = dialogHTMLShow.replace("#speech", dialog[mission]["opening"][dialogCount]["speech"]);
+                dialogHTMLShow = dialogHTMLShow.replace("#face", dialog[mission]["opening"][dialogCount]["id"]);
+                $("#mapDialog").append(dialogHTMLShow);
+                if( dialog[mission]["opening"][dialogCount].hasOwnProperty("voice") ){
+                    var voice = dialog[mission]["opening"][dialogCount]["voice"];
+                    var audio = new Audio('./assets/voice/'+voice+'.mp3');
+                    audio.volume = 0.3;
+                    audio.play();
+                }
+            }
+        } else {
+            running();
+        }
+    }
+
+    $(".dialog").on("click", function() {
+        ckSound();
+        if($(this).attr('data-dialog') === "opening") {
+            dialogCount++;
+            loadOpeningDialog(type);
+
+            if (type === "opening") {
+                if (dialogCount >= ((dialog[mission]["opening"]).length)) {
+                    running();
+                }
+            }
+        }
+    });
+}
+
 
 $("#loadGameBtn").on("click", function() {
     ckSound();
@@ -221,7 +265,6 @@ function placeRobot(){
         });
     });
 
-    clickBoxPlayerListener();
 }
 
 function clickBoxPlayerListener() {
@@ -1160,9 +1203,11 @@ $(window).on('resize', function(){
     if (win.width() < 1300) {
         $("#map").hide();
         $(".warning-notice").show();
+        $("#main-container").unbind();
     } else {
         $(".warning-notice").hide();
         $("#map").show();
+        activeMainMenuListener();
     }
 });
 

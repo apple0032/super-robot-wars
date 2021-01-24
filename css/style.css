@@ -15,6 +15,7 @@ body {
   background-image: url(../assets/background.jpg);
   background-size: cover;
   background-attachment: fixed;
+  user-select: none;
 }
 .btnBox {
   display: none;
