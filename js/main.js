@@ -55,7 +55,7 @@ function createMap(size = 12){
     var viewerHeight = parseInt(row) * 40;
 
     var i,j;
-    var mapHTML = "<div id='mainMap'>";
+    var mapHTML = "";
 
     for (i = 1; i <= row; i++) {
        mapHTML += '<div class="map-row data-row-'+i+'">';
@@ -68,35 +68,43 @@ function createMap(size = 12){
         mapHTML += '</div>';
     }
 
-    mapHTML += '</div>';
+    $("#mainMap").html(mapHTML); //Display the map HTML
 
-    mapHTML += '<div id="MapViewer_container">';
-        mapHTML += '<div id="MapViewer" style="height: '+viewerHeight+'px; ">';
-        mapHTML += '<i class="fas fa-dice" data-toggle="tooltip" title="現在回合"></i><br>';
-        mapHTML += '<div class="turn_number">'+turn+'</div>';
-        mapHTML += '<br><br>';
-        mapHTML += '<i class="fas fa-chess-knight" data-toggle="tooltip" title="我方行動"></i><br>';
-        mapHTML += '<div class="move_remain"></div>';
-        mapHTML += '<br><br>';
-        mapHTML += '<i class="fas fa-chess-king" data-toggle="tooltip" title="我方兵力"></i><br>';
-        mapHTML += '<div class="player_robot_remain"></div>';
-        mapHTML += '<br><br>';
-        mapHTML += '<i class="fas fa-chess-rook" data-toggle="tooltip" title="敵方兵力"></i><br>';
-        mapHTML += '<div class="ai_robot_remain"></div>';
+    var mapViewer = "";
+        mapViewer += '<div id="MapViewer_container">';
+        mapViewer += '<div id="MapViewer" style="height: '+viewerHeight+'px; ">';
+        mapViewer += '<i class="fas fa-dice" data-toggle="tooltip" title="現在回合"></i><br>';
+        mapViewer += '<div class="turn_number">'+turn+'</div>';
+        mapViewer += '<br><br>';
+        mapViewer += '<i class="fas fa-chess-knight" data-toggle="tooltip" title="我方行動"></i><br>';
+        mapViewer += '<div class="move_remain"></div>';
+        mapViewer += '<br><br>';
+        mapViewer += '<i class="fas fa-chess-king" data-toggle="tooltip" title="我方兵力"></i><br>';
+        mapViewer += '<div class="player_robot_remain"></div>';
+        mapViewer += '<br><br>';
+        mapViewer += '<i class="fas fa-chess-rook" data-toggle="tooltip" title="敵方兵力"></i><br>';
+        mapViewer += '<div class="ai_robot_remain"></div>';
         if ('third' in robot) {
-            mapHTML += '<br><br>';
-            mapHTML += '<i class="fas fa-chess-queen" data-toggle="tooltip" title="友軍勢力"></i><br>';
-            mapHTML += '<div class="third_robot_remain"></div>';
+            mapViewer += '<br><br>';
+            mapViewer += '<i class="fas fa-chess-queen" data-toggle="tooltip" title="友軍勢力"></i><br>';
+            mapViewer += '<div class="third_robot_remain"></div>';
         }
-        mapHTML += '<br><br>';
-        mapHTML += '<i class="fas fa-border-all" data-toggle="tooltip" title="顯示格線"></i><br>';
-        mapHTML += '<div class="show_map_border"></div>';
-        mapHTML += '</div>';
-    mapHTML += '</div>';
+        mapViewer += '<br><br>';
+        mapViewer += '<i class="fas fa-border-all" data-toggle="tooltip" title="顯示格線"></i><br>';
+        mapViewer += '<div class="show_map_border"></div>';
+    mapViewer += '</div>';
 
-    $("#map").html(mapHTML); //Display the map HTML
+    $("#MapViewer_container").html(mapViewer);
+
+
+
+
+
 
     $('[data-toggle="tooltip"]').tooltip();  //display tooltip
+
+
+    /**************************** PLACE MAP WALLPAPER & OBJECTS & ITEMS ****************************/
 
     //Step1 : Place base map
     var base = mapInfo[mission]["base"];
@@ -239,7 +247,7 @@ function clickBoxPlayerListener() {
 
         $('.box-is-player').unbind();
         $('.box-is-player').click(function (e) {
-            if ($(this).hasClass("box-is-player") === true && ( isAiMove === false) && (isThirdMove === false)  ) {
+            if ($(this).hasClass("box-is-player") === true && ( isPlayerMove === true) && ( isAiMove === false) && (isThirdMove === false)  ) {
                 ckSound();
                 openRobotMenu(e);
                 closeMainMenu();
@@ -314,7 +322,7 @@ function mapViewerListener() {
                 var robotID = getRobotID($(this));
                 var RobotData = getRobotData(robotID, "ai");
 
-                var available_pos = getAvailableCoordinate(RobotData.x, RobotData.y, RobotData.moveLevel);
+                var available_pos = getAvailableCoordinate(RobotData.x, RobotData.y, "move");
                 showMove(available_pos, "ai");
             }
         });
@@ -335,7 +343,7 @@ function mapViewerListener() {
                 var robotID = getRobotID($(this));
                 var RobotData = getRobotData(robotID, "third");
 
-                var available_pos = getAvailableCoordinate(RobotData.x, RobotData.y, RobotData.moveLevel);
+                var available_pos = getAvailableCoordinate(RobotData.x, RobotData.y, "move");
                 showMove(available_pos, "third");
             }
         });
@@ -364,7 +372,7 @@ function action(robotEle, target = "player"){
     var RobotData = getRobotData(robotID,target);
 
     var moveLevel = RobotData.moveLevel;
-    var available_pos = getAvailableCoordinate(focus_robot_x,focus_robot_y, moveLevel);
+    var available_pos = getAvailableCoordinate(focus_robot_x,focus_robot_y, "move");
 
     showMove(available_pos, target);
 
@@ -611,7 +619,7 @@ async function aiMove() {
                     //2.Find move pos
                     if (canAttack === false) {
                         //Find all available POS
-                        var available_pos = getAvailableCoordinate(currentRobot.x, currentRobot.y, currentRobot.moveLevel);
+                        var available_pos = getAvailableCoordinate(currentRobot.x, currentRobot.y, "move");
                         var moveCoordinateByTarget = getMoveCoordinateByTarget(available_pos, targetRobot.x, targetRobot.y);
                         moveCoordinateByTarget.sort(sortByX);
 
@@ -816,7 +824,7 @@ async function showTurnNotice() {
 
 function resetMap(resetRobotStatus = false) {
     //Remove and delete whole map element
-    $("#map").html("");
+    $("#mainMap").html("");
 
     //Recreate new map
     createMap(mapSize);
@@ -915,19 +923,92 @@ function getMiddle(array, i = 0) {
 }
 
 
-function getAvailableCoordinate(eleX, eleY, moveLevel) {
+function getAvailableCoordinate(eleX, eleY, action = "move") {
     var currentPos = [{x: eleX, y: eleY}];
+
+    if( action === "move") {
+        //check the element around the target in four directions, block if robot surrounded by item and enemy when doing move
+        var ele = $(".data-box-" + eleX + "-" + eleY);
+        var eleLeft = ($(".data-box-" + (eleX - 1) + "-" + eleY));
+        var eleRight = ($(".data-box-" + (eleX + 1) + "-" + eleY));
+        var eleTop = ($(".data-box-" + eleX + "-" + (eleY - 1)));
+        var eleDown = ($(".data-box-" + eleX + "-" + (eleY + 1)));
+        var eleType = getRobotType(ele);
+        var isThirdAlly = robot.third.isAlly;
+
+        if ((eleLeft.hasClass("box-is-block")) && (eleRight.hasClass("box-is-block")) && (eleTop.hasClass("box-is-block")) && (eleDown.hasClass("box-is-block"))) {
+            return null;
+        }
+
+        if (eleType === "player") {
+            if (isThirdAlly === false) {
+                if (((eleLeft.hasClass("box-is-ai")) || (eleLeft.hasClass("box-is-block")) || (eleLeft.hasClass("box-is-third"))) &&
+                    ((eleRight.hasClass("box-is-ai")) || (eleRight.hasClass("box-is-block")) || (eleRight.hasClass("box-is-third"))) &&
+                    ((eleTop.hasClass("box-is-ai")) || (eleTop.hasClass("box-is-block")) || (eleTop.hasClass("box-is-third"))) &&
+                    ((eleDown.hasClass("box-is-ai")) || (eleDown.hasClass("box-is-block")) || (eleDown.hasClass("box-is-third")))
+                ) {
+                    return currentPos;
+                }
+            } else {
+                if (((eleLeft.hasClass("box-is-ai")) || (eleLeft.hasClass("box-is-block"))) &&
+                    ((eleRight.hasClass("box-is-ai")) || (eleRight.hasClass("box-is-block"))) &&
+                    ((eleTop.hasClass("box-is-ai")) || (eleTop.hasClass("box-is-block"))) &&
+                    ((eleDown.hasClass("box-is-ai")) || (eleDown.hasClass("box-is-block")))
+                ) {
+                    return currentPos;
+                }
+            }
+        }
+
+        if (eleType === "ai" || eleType === "third") {
+            if (isThirdAlly === false) {
+                if (((eleLeft.hasClass("box-is-player")) || (eleLeft.hasClass("box-is-block"))) &&
+                    ((eleRight.hasClass("box-is-player")) || (eleRight.hasClass("box-is-block"))) &&
+                    ((eleTop.hasClass("box-is-player")) || (eleTop.hasClass("box-is-block"))) &&
+                    ((eleDown.hasClass("box-is-player")) || (eleDown.hasClass("box-is-block")))
+                ) {
+                    return currentPos;
+                }
+            } else {
+                if (eleType === "ai") {
+                    if (((eleLeft.hasClass("box-is-player")) || (eleLeft.hasClass("box-is-block")) || (eleLeft.hasClass("box-is-third"))) &&
+                        ((eleRight.hasClass("box-is-player")) || (eleRight.hasClass("box-is-block")) || (eleRight.hasClass("box-is-third"))) &&
+                        ((eleTop.hasClass("box-is-player")) || (eleTop.hasClass("box-is-block")) || (eleTop.hasClass("box-is-third"))) &&
+                        ((eleDown.hasClass("box-is-player")) || (eleDown.hasClass("box-is-block")) || (eleDown.hasClass("box-is-third")))
+                    ) {
+                        return currentPos;
+                    }
+                } else {
+                    if (((eleLeft.hasClass("box-is-player")) || (eleLeft.hasClass("box-is-block")) || (eleLeft.hasClass("box-is-ai"))) &&
+                        ((eleRight.hasClass("box-is-player")) || (eleRight.hasClass("box-is-block")) || (eleRight.hasClass("box-is-ai"))) &&
+                        ((eleTop.hasClass("box-is-player")) || (eleTop.hasClass("box-is-block")) || (eleTop.hasClass("box-is-ai"))) &&
+                        ((eleDown.hasClass("box-is-player")) || (eleDown.hasClass("box-is-block")) || (eleDown.hasClass("box-is-ai")))
+                    ) {
+                        return currentPos;
+                    }
+                }
+            }
+        }
+    }
+
+    var robotID = getRobotID(ele);
+    var robotData = getRobotData(robotID,eleType);
+    var robotRange;
+    if(action === "move") {
+        robotRange = robotData.moveLevel;
+    }
+
     var avail_coordinate = [];
     var available_pos = [];
     avail_coordinate.push(eleX);
     avail_coordinate.push(eleY);
-    for (i = 1; i <= moveLevel; i++) {
+    for (i = 1; i <= robotRange; i++) {
         available_pos.push({x: parseInt(eleX), y:parseInt(eleY) + i});
         available_pos.push({x: parseInt(eleX), y:parseInt(eleY) - i});
         avail_coordinate.push(parseInt(eleY) + i);
         avail_coordinate.push(parseInt(eleY) - i);
     }
-    for (i = 1; i <= moveLevel; i++) {
+    for (i = 1; i <= robotRange; i++) {
         available_pos.push({x: parseInt(eleX) + i , y:parseInt(eleY)});
         available_pos.push({x: parseInt(eleX) - i, y:parseInt(eleY)});
         avail_coordinate.push(parseInt(eleX) + i);
@@ -952,76 +1033,13 @@ function getAvailableCoordinate(eleX, eleY, moveLevel) {
         }
 
         var distance = distance_x + distance_y;
-        if(distance <= moveLevel){
+        if(distance <= robotRange){
             available_pos.push({x: value.x  , y:value.y});
         }
     });
 
     available_pos = getUniqueArray(available_pos);
 
-
-    //check the element around the target in four directions
-    var ele =  $(".data-box-" + eleX + "-" + eleY);
-    var eleLeft = ($(".data-box-" + (eleX-1) + "-" + eleY));
-    var eleRight = ($(".data-box-" + (eleX+1) + "-" + eleY));
-    var eleTop = ($(".data-box-" + eleX + "-" + (eleY-1)));
-    var eleDown = ($(".data-box-" + eleX + "-" + (eleY+1)));
-    var eleType = getRobotType(ele);
-    var isThirdAlly = robot.third.isAlly;
-
-    if( (eleLeft.hasClass("box-is-block")) && (eleRight.hasClass("box-is-block")) && (eleTop.hasClass("box-is-block")) && (eleDown.hasClass("box-is-block")) ) {
-        return null;
-    }
-
-    if(eleType === "player"){
-        if(isThirdAlly === false) {
-            if (((eleLeft.hasClass("box-is-ai")) || (eleLeft.hasClass("box-is-block")) || (eleLeft.hasClass("box-is-third"))) &&
-                ((eleRight.hasClass("box-is-ai")) || (eleRight.hasClass("box-is-block")) || (eleRight.hasClass("box-is-third"))) &&
-                ((eleTop.hasClass("box-is-ai")) || (eleTop.hasClass("box-is-block")) || (eleTop.hasClass("box-is-third"))) &&
-                ((eleDown.hasClass("box-is-ai")) || (eleDown.hasClass("box-is-block")) || (eleDown.hasClass("box-is-third")))
-            ) {
-                return currentPos;
-            }
-        } else {
-            if (((eleLeft.hasClass("box-is-ai")) || (eleLeft.hasClass("box-is-block"))  ) &&
-                ((eleRight.hasClass("box-is-ai")) || (eleRight.hasClass("box-is-block")) ) &&
-                ((eleTop.hasClass("box-is-ai")) || (eleTop.hasClass("box-is-block")) ) &&
-                ((eleDown.hasClass("box-is-ai")) || (eleDown.hasClass("box-is-block")) )
-            ) {
-                return currentPos;
-            }
-        }
-    }
-
-    if(eleType === "ai" || eleType === "third"){
-        if(isThirdAlly === false) {
-            if (((eleLeft.hasClass("box-is-player")) || (eleLeft.hasClass("box-is-block")) ) &&
-                ((eleRight.hasClass("box-is-player")) || (eleRight.hasClass("box-is-block")) ) &&
-                ((eleTop.hasClass("box-is-player")) || (eleTop.hasClass("box-is-block")) ) &&
-                ((eleDown.hasClass("box-is-player")) || (eleDown.hasClass("box-is-block")) )
-            ) {
-                return currentPos;
-            }
-        } else {
-            if(eleType === "ai") {
-                if (((eleLeft.hasClass("box-is-player")) || (eleLeft.hasClass("box-is-block")) || (eleLeft.hasClass("box-is-third"))) &&
-                    ((eleRight.hasClass("box-is-player")) || (eleRight.hasClass("box-is-block")) || (eleRight.hasClass("box-is-third"))) &&
-                    ((eleTop.hasClass("box-is-player")) || (eleTop.hasClass("box-is-block")) || (eleTop.hasClass("box-is-third"))) &&
-                    ((eleDown.hasClass("box-is-player")) || (eleDown.hasClass("box-is-block")) || (eleDown.hasClass("box-is-third")))
-                ) {
-                    return currentPos;
-                }
-            } else {
-                if (((eleLeft.hasClass("box-is-player")) || (eleLeft.hasClass("box-is-block")) || (eleLeft.hasClass("box-is-ai"))) &&
-                    ((eleRight.hasClass("box-is-player")) || (eleRight.hasClass("box-is-block")) || (eleRight.hasClass("box-is-ai"))) &&
-                    ((eleTop.hasClass("box-is-player")) || (eleTop.hasClass("box-is-block")) || (eleTop.hasClass("box-is-ai"))) &&
-                    ((eleDown.hasClass("box-is-player")) || (eleDown.hasClass("box-is-block")) || (eleDown.hasClass("box-is-ai")))
-                ) {
-                    return currentPos;
-                }
-            }
-        }
-    }
 
 
     //Filter all not allowed pos
