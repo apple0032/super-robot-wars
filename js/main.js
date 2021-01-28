@@ -67,7 +67,7 @@ function loadOpeningDialog(type) {
                     var voice = dialog[mission]["opening"][dialogCount]["voice"];
                     var audio = new Audio('./assets/voice/'+voice+'.mp3');
                     audio.volume = 0.3;
-                    audio.play();
+                    //audio.play();
                 }
             }
         } else {
@@ -197,7 +197,7 @@ function createMap(size = 12){
                             $(".data-box-" + absX + "-" + absY).addClass("box-is-block");
                         }
                         if (v2.copy === true) {
-                            $(".data-box-" + absX + "-" + absY).prepend('<div class="map_base" style="position: absolute;"><img src="./assets/map/' + k1 + '.png" style="width: ' + ImgSizeX + 'px;height: ' + ImgSizeY + 'px;"></div>\n');
+                            $(".data-box-" + absX + "-" + absY).prepend('<div class="map_base" style="position: absolute;"><img src="./assets/map/' + k1 + '.png" style="width: ' + ImgSizeX + 'px;height: ' + ImgSizeY + 'px;" draggable="false"></div>\n');
                         }
                     });
                 } else {
@@ -219,7 +219,7 @@ function createMap(size = 12){
                     });
                 }
                 if ( !v2.hasOwnProperty("copy") || v2.copy === false) {
-                    $(".data-box-" + startX + "-" + startY).prepend('<div class="map_base" style="position: absolute;"><img src="./assets/map/' + k1 + '.png" style="width: ' + ImgSizeX + 'px;height: ' + ImgSizeY + 'px;"></div>\n');
+                    $(".data-box-" + startX + "-" + startY).prepend('<div class="map_base" style="position: absolute;"><img src="./assets/map/' + k1 + '.png" style="width: ' + ImgSizeX + 'px;height: ' + ImgSizeY + 'px;" draggable="false"></div>\n');
                 }
             } else {
                 var rangeStart = range(parseInt(((v2.from).split(","))[0]), parseInt(((v2.to).split(","))[0]));
@@ -233,7 +233,7 @@ function createMap(size = 12){
                     }
                     var ImgSizeX = v2.sizeX * 40;
                     var ImgSizeY = v2.sizeY * 40;
-                    $(".data-box-"+v3.x+"-"+v3.y).prepend('<div class="map_base" style="position: absolute;"><img src="./assets/map/' + k1 + '.png" style="width: ' + ImgSizeX + 'px;height: ' + ImgSizeY + 'px;"></div>\n');
+                    $(".data-box-"+v3.x+"-"+v3.y).prepend('<div class="map_base" style="position: absolute;"><img src="./assets/map/' + k1 + '.png" style="width: ' + ImgSizeX + 'px;height: ' + ImgSizeY + 'px;" draggable="false"></div>\n');
                 });
             }
         });
@@ -250,15 +250,15 @@ function placeRobot(){
         $.each( value.robotsElement, function( key2, value2 ) {
             var robotPos = "data-box-"+value2.x+"-"+value2.y;
             if(key === "ai"){
-                $("."+robotPos).append("<img src='./assets/robot"+value2.robotID+".png' data-robot='"+key2+"' class='is_robot'>");
+                $("."+robotPos).append("<img src='./assets/robot"+value2.robotID+".png' data-robot='"+key2+"' class='is_robot' draggable='false'>");
                 $("."+robotPos).addClass("box-is-ai");
             }
             if(key === "player"){
-                $("."+robotPos).append("<img src='./assets/robot"+value2.robotID+".png' data-robot='"+key2+"' class='is_robot'>");
+                $("."+robotPos).append("<img src='./assets/robot"+value2.robotID+".png' data-robot='"+key2+"' class='is_robot' draggable='false'>");
                 $("."+robotPos).addClass("box-is-player");
             }
             if(key === "third"){
-                $("."+robotPos).append("<img src='./assets/robot"+value2.robotID+".png' data-robot='"+key2+"' class='is_robot'>");
+                $("."+robotPos).append("<img src='./assets/robot"+value2.robotID+".png' data-robot='"+key2+"' class='is_robot' draggable='false'>");
                 $("."+robotPos).addClass("box-is-third");
             }
                 $("."+robotPos).css("background-size","auto");
@@ -656,15 +656,13 @@ async function aiMove() {
         //Will loop through all ai robot
         var aiRobot = robot.ai.robotsElement;
         for (const value of Object.keys(aiRobot)) {
-            if(isPlayerMove === false) {
-                var currentRobot = aiRobot[value];
-
+            var currentRobot = aiRobot[value];
+            if(isPlayerMove === false && currentRobot.isMoved === false && currentRobot.isDestroyed === false) {
                 while (currentRobot.isMoved === false) {
                     var targetRobot = robot.player.robotsElement.robotID_6;
 
                     //1.Find attack target, if yes stop moving, do attack
                     var canAttack = getRobotCanAttack(currentRobot, "ai");
-
 
                     //2.Find move pos
                     if (canAttack === false) {
@@ -695,7 +693,6 @@ async function aiMove() {
                             }, movingTime);
                         }
                     }
-
 
                     await delay(movingTime + 500);
                 }

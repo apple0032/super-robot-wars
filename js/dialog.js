@@ -14,8 +14,8 @@ var dialogHTML =
 var dialog = {
     "1" : {
         "opening" : [
-            {"id" : "amuro-1","name" : "呀寶", "speech" : "人類總是重複同樣的錯誤....νガンダムは伊达じゃない！", "pos" : "bot", "focus" : "robotID_6","voice" :"amuro_nugundam"},
             {"id" : "1095" ,"name" : "星野琉璃", "speech" : "全機! 突擊!", "pos" : "bot"},
+            {"id" : "amuro-1","name" : "呀寶", "speech" : "人類總是重複同樣的錯誤....νガンダムは伊达じゃない！", "pos" : "bot", "focus" : "robotID_6","voice" :"amuro_nugundam"},
             {"id" : "1060","name" : "天河明人", "speech" : "遵從艦長指令! 全機.. 突擊!", "pos" : "bot"}
         ]
     }
