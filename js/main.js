@@ -49,6 +49,7 @@ function loadOpeningDialog(type) {
         activeMainMenuListener();
         updateMapViewer();
         showTurnNotice();
+        enablePlayerActivity();
         $(".dialog").unbind();
         dialogCount = 0;
     };
@@ -63,11 +64,20 @@ function loadOpeningDialog(type) {
                 dialogHTMLShow = dialogHTMLShow.replace("#speech", dialog[mission]["opening"][dialogCount]["speech"]);
                 dialogHTMLShow = dialogHTMLShow.replace("#face", dialog[mission]["opening"][dialogCount]["id"]);
                 $("#mapDialog").append(dialogHTMLShow);
+                disablePlayerActivity();
                 if( dialog[mission]["opening"][dialogCount].hasOwnProperty("voice") ){
                     var voice = dialog[mission]["opening"][dialogCount]["voice"];
                     var audio = new Audio('./assets/voice/'+voice+'.mp3');
                     audio.volume = 0.3;
                     //audio.play();
+                }
+                if( dialog[mission]["opening"][dialogCount].hasOwnProperty("target") ){
+                    var target = dialog[mission]["opening"][dialogCount]["target"];
+                    var dialog_target = getRobotDataByID(target);
+                    if(dialog_target != null) {
+                        dialog_target = $(".data-box-"+dialog_target.x+"-"+dialog_target.y+" .box_layer");
+                        dialog_target.css({"background-color" : "rgba(222,222,222,0.7)", "z-index" : 10});
+                    }
                 }
             }
         } else {
@@ -77,6 +87,7 @@ function loadOpeningDialog(type) {
 
     $(".dialog").on("click", function() {
         ckSound();
+        $(".box_layer").css({"background-color":"transparent", "z-index" : "auto"});
         if($(this).attr('data-dialog') === "opening") {
             dialogCount++;
             loadOpeningDialog(type);
@@ -585,6 +596,15 @@ function closeMainMenu() {
     $("#MainMenu").css({"display":"none"});
 }
 
+function disablePlayerActivity() {
+    $("#MainMenu").css("pointer-events","none");
+    $("#mainMap").css("pointer-events","none");
+}
+
+function enablePlayerActivity() {
+    $("#MainMenu").css("pointer-events","auto");
+    $("#mainMap").css("pointer-events","auto");
+}
 
 
 function activeMainMenuListener() {
@@ -1183,7 +1203,22 @@ function getRobotType(ele){
 }
 
 
+function getRobotDataByID(target){
 
+    var dialog_target = null; //robot["player"]["robotsElement"][target];
+
+    $.each( robot.player.robotsElement, function( key, value ) {
+        if(target === key){ dialog_target = value; return; }
+    });
+    $.each( robot.ai.robotsElement, function( key, value ) {
+        if(target === key){ dialog_target = value; return; }
+    });
+    $.each( robot.third.robotsElement, function( key, value ) {
+        if(target === key){ dialog_target = value; return; }
+    });
+
+    return dialog_target;
+}
 
 
 
