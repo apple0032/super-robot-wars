@@ -514,7 +514,7 @@ function robotMoveToNewPoint(movedPosEle,robotEle, target = "player") {
     setTimeout(function(){
         //When finishing move
         $(robotEle).find(".is_robot").remove(); //clear old pos robot
-        $(movedPosEle).append("<img class='robot_moved is_robot' src='./assets/robot"+RobotData.robotID+".png' data-robot='"+robotID+"'>"); //new image show //控制二回移動
+        $(movedPosEle).append("<img class='robot_moved is_robot' src='./assets/robot"+RobotData.robotID+".png' data-robot='"+robotID+"' draggable='false'>"); //new image show //控制二回移動
 
         if(target === "player") {
             $(movedPosEle).addClass("box-is-player");
@@ -556,6 +556,24 @@ function robotMoveToNewPoint(movedPosEle,robotEle, target = "player") {
             $('#afterMove_attack').click(function () {
                 ckSound();
                 attackAfterMove(movedPosEle);
+            });
+
+            $('#afterMove_cancel').unbind();
+            $('#afterMove_cancel').click(function () {
+                ckSound();
+                $(robotEle).append("<img class='is_robot' src='./assets/robot"+RobotData.robotID+".png' data-robot='"+robotID+"' draggable='false'>");
+                $(robotEle).addClass("box-is-player");
+
+                $(movedPosEle).find(".is_robot").remove();
+                $(movedPosEle).removeClass("box-is-player");
+
+                var oldCoordinate = getCoordinateByEle(robotEle);
+                robot[target]["robotsElement"][robotID]["x"] = parseInt(oldCoordinate[0]);
+                robot[target]["robotsElement"][robotID]["y"] = parseInt(oldCoordinate[1]);
+                robot[target]["robotsElement"][robotID]["isMoved"] = false;
+
+                closeAfterMoveMenu();
+                clickBoxPlayerListener();
             });
 
             updateMapViewer();
