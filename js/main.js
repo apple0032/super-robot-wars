@@ -289,6 +289,11 @@ function clickBoxPlayerListener() {
             closeMainMenu();
         });
 
+        $("#player_attack").unbind();
+        $("#player_attack").click(function (e) {
+            getRobotAttackRange(focusRobot);
+        });
+
         $('.mapbox').unbind();
         $(".mapbox").click(function (e) {
             if (!$(this).hasClass("box-is-player")) {
@@ -931,6 +936,14 @@ function getRobotCanAttack(robot, target = "player") {
     return false;
 }
 
+function getRobotAttackRange(robot) {
+    var attackRobotID = getRobotID(robot);
+    var attackRobotData = getRobotData(attackRobotID);
+
+    ll(robot);
+    ll(attackRobotData);
+}
+
 function getCoordinateByEle(ele) {
     var coordinate = ele.find(".developer-coordinate");
     coordinate = coordinate.html();
@@ -1308,4 +1321,4 @@ function ll(log){
 }
 
 
-//Test github in other workplace
+//Test github in other workplace 2021-02-08
