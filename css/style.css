@@ -128,7 +128,7 @@ body {
   /*top: 25%;*/
   left: 50%;
   width: 500px;
-  height: 350px;
+  height: 400px;
   background: #d3d3d3e6;
   border: 1px solid #505050;
   font-family: 'Noto Serif JP', serif;
@@ -145,13 +145,94 @@ body {
 }
 
 .WeaponMenu_bar i{
-  float: right;
-  padding: 5px;
   cursor: pointer;
+  position: absolute;
+  left: 470px;
+  font-size: 25px;
+  color: #585858;
 }
 
 .weaponList{
+  height: 200px;
+  overflow-y: scroll;
+  border-bottom: 1px solid #31313173;
+  padding-bottom: 5px;
+}
 
+.weaponInfo{
+  width: 98%;
+  margin: 5px 3px 0 3px;
+  font-size: 16px;
+  padding-left: 10px;
+  padding-right: 10px;
+  border: 1px solid #afafaf;
+  border-radius: 5px;
+  color: #353535;
+  background: #cacaca;
+}
+
+.weaponInfo_left{
+  width: 55%;
+  display: inline-block;
+  vertical-align: top;
+  padding-top: 5px;
+}
+
+.weaponInfo_right{
+  width: 44%;
+  display: inline-block;
+  vertical-align: top;
+  padding: 5px 0 3px 10px;
+}
+
+.weaponInfoItem{
+  border-bottom: 2px solid #a0a0a0;
+  padding: 2px 0;
+}
+
+.weaponInfoItem span{
+  font-weight: bold;
+  margin-left: 20px;
+  /*font-style: italic;*/
+}
+
+.weaponEffectBox{
+  width: 100%;
+  height: 95px;
+  border-radius: 10px;
+  border: 1px solid #9c9c9c;
+}
+
+.Weapon_symbol{
+  background: #252525;
+  color: white;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-radius: 5px;
+  font-size: 13px;
+  margin-left: 0 !important;
+  font-style: normal !important;
+}
+
+
+/* width */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #888;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
 }
 
 .weaponList hr{
@@ -171,6 +252,12 @@ body {
   background-color: gray;
 }
 
+.not_allowed_weapon{
+  background-color: gray;
+  color: #636363;
+  cursor: not-allowed;
+}
+
 .weaponList_label{
   display: inline-block;
   font-size: 15px;
@@ -178,11 +265,11 @@ body {
 }
 
 .weaponList_weapon{
-  width: 220px;
+  width: 200px;
 }
 
 .weaponList_power{
-  width: 70px;
+  width: 90px;
 }
 
 .weaponList_range{
@@ -341,11 +428,11 @@ body {
   font-size: 20px;
 }
 
-.disable_move .player_menu_text{
+.disable_context_action .player_menu_text{
   color: #b9b9b9;
 }
 
-.disable_move{
+.disable_context_action{
   pointer-events: none;
   cursor: not-allowed;
 }

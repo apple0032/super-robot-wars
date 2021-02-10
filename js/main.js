@@ -345,9 +345,13 @@ function clickBoxPlayerListener() {
                 if( $(this).hasClass("box-is-player") ) {
                     if (getRobotStatus(getRobotID($(this))) === false) {
                         focusRobot = $(this);
-                        $("#player_move").removeClass("disable_move");
+                        $("#player_move").removeClass("disable_context_action");
+                        $("#player_attack").removeClass("disable_context_action");
+                        $("#player_spirit").removeClass("disable_context_action");
                     } else {
-                        $("#player_move").addClass("disable_move");
+                        $("#player_move").addClass("disable_context_action");
+                        $("#player_attack").addClass("disable_context_action");
+                        $("#player_spirit").addClass("disable_context_action");
                     }
                 }
             }
@@ -984,12 +988,12 @@ function getRobotCanAttack(robot, target = "player") {
     return false;
 }
 
-function showWeaponList(robot) {
+function showWeaponList(robotEle) {
     $(".mapbox").removeClass("available_attack");
-    var attackRobotID = getRobotID(robot);
+    var attackRobotID = getRobotID(robotEle);
     var attackRobotData = getRobotData(attackRobotID);
 
-    $(robot).addClass("isFocused");
+    $(robotEle).addClass("isFocused");
 
     $("#MainMenu").css("pointer-events","none");
     $("#contextMenu").css("pointer-events","none");
@@ -1002,10 +1006,15 @@ function showWeaponList(robot) {
     $(".weaponList_weapons").html("");
     var weaponHTML = "";
     $.each( attackRobotData.weapons, function( k, v ) {
-        weaponHTML += '<div class="weaponList_item">';
+        var addClass = "";
+        if( (parseInt(v.ammo) === 0) || ( attackRobotData.morale < v.morale ) ){
+            addClass = "not_allowed_weapon";
+        }
+
+        weaponHTML += '<div class="weaponList_item '+addClass+'">';
         weaponHTML += '<div class="weaponList_label weaponList_weapon">'+v.name+'</div>';
         weaponHTML += '<div class="weaponList_label weaponList_power">'+v.power+'</div>';
-        if(v.range === "1"){
+        if(v.range === 1){
             weaponHTML += '<div class="weaponList_label weaponList_range">'+v.range+'</div>';
         } else {
             if(v.hasOwnProperty("range_from")){
@@ -1036,17 +1045,98 @@ function showWeaponList(robot) {
         $(this).parent().parent().hide();
         enablePlayerActivity();
         $("#map").css("filter","none");
-        $(robot).removeClass("isFocused");
+        $(robotEle).removeClass("isFocused");
         isDoingAttack = false;
     });
 
     $(".weaponList_item").unbind();
     $(".weaponList_item").click(function (e) {
-        attackRobot = attackRobotID;
-        attackWeaponIndex = $(this).index();
-        $(".fa-window-close").click();
-        getRobotAttackRange(robot);
-        closeAfterMoveMenu();
+        if( (!$(this).hasClass("not_allowed_weapon")) ) {
+            attackRobot = attackRobotID;
+            attackWeaponIndex = $(this).index();
+            $(".fa-window-close").click();
+            getRobotAttackRange(robotEle);
+            closeAfterMoveMenu();
+        }
+    });
+
+    $(".weaponInfo").html("");
+    $(".weaponList_item").hover(function (e) {
+        var openedRobot = $("#WeaponMenu").attr('data-robot');
+        var hoverWeapon = (robot.player.robotsElement[openedRobot]["weapons"][$(this).index()]);
+        $(".weaponInfo").html("");
+
+        var newWeaponInfoHTML = "";
+        //Left side
+        newWeaponInfoHTML += '<div class="weaponInfo_left">';
+            if(hoverWeapon.type === "warri") {
+                newWeaponInfoHTML += '<div class="weaponInfoItem">近戰武器</div>';
+            } else {
+                newWeaponInfoHTML += '<div class="weaponInfoItem">射擊武器</div>';
+            }
+
+            if(hoverWeapon.afterMove === true || hoverWeapon.isSeep === true) {
+                newWeaponInfoHTML += '<div class="weaponInfoItem">';
+
+                if(hoverWeapon.afterMove === true){
+                    newWeaponInfoHTML += '<span class="Weapon_symbol">P</span> 移動後可攻擊 ';
+                    if(hoverWeapon.isSeep === true){
+                        newWeaponInfoHTML += ' / ';
+                    }
+                }
+
+                if(hoverWeapon.isSeep === true){
+                    newWeaponInfoHTML += '<span class="Weapon_symbol">S</span> 可貫穿護盾 ';
+                }
+
+                newWeaponInfoHTML += '</div>';
+            }
+
+            if(hoverWeapon.hasOwnProperty("morale")) {
+                newWeaponInfoHTML += '<div class="weaponInfoItem">所需氣力 ';
+                if(robot.player.robotsElement[openedRobot]['morale'] < hoverWeapon.morale){
+                    newWeaponInfoHTML += '<span style="color: red">'+hoverWeapon.morale+'</span>';
+                } else {
+                    newWeaponInfoHTML += '<span>'+hoverWeapon.morale+'</span>';
+                }
+                newWeaponInfoHTML += '</div>';
+            } else {
+                newWeaponInfoHTML += '<div class="weaponInfoItem">所需氣力 </div>';
+            }
+
+            if(hoverWeapon.hasOwnProperty("hitRate")) {
+                newWeaponInfoHTML += '<div class="weaponInfoItem">命中補正 <span>'+hoverWeapon.hitRate+'%</span> </div>';
+            } else {
+                newWeaponInfoHTML += '<div class="weaponInfoItem">命中補正 </div>';
+            }
+
+            if(hoverWeapon.hasOwnProperty("crt")) {
+                newWeaponInfoHTML += '<div class="weaponInfoItem">會心補正 <span>'+hoverWeapon.crt+'%</span> </div>';
+            } else {
+                newWeaponInfoHTML += '<div class="weaponInfoItem">會心補正 </div>';
+            }
+
+        newWeaponInfoHTML += '</div>';
+
+        //Right side
+        newWeaponInfoHTML += '<div class="weaponInfo_right">';
+
+            newWeaponInfoHTML += '<div class="weaponInfoItem">已強化 ['+robot.player.robotsElement[openedRobot]['weaponsLv']+'/10]</div>';
+                newWeaponInfoHTML += '<div>特殊能力';
+                    newWeaponInfoHTML += '<div class="weaponEffectBox">';
+                        if(!hoverWeapon.hasOwnProperty("effect")){
+                            newWeaponInfoHTML += ' 沒有 ';
+                        } else {
+                            $.each( hoverWeapon.effect, function( key, value ) {
+                                newWeaponInfoHTML += Object.keys(value)[0]+':'+value[Object.keys(value)[0]]+'<br>';
+                            });
+                        }
+                    newWeaponInfoHTML += '</div>';
+                newWeaponInfoHTML += '</div>';
+        newWeaponInfoHTML += '</div>';
+
+
+        $(".weaponInfo").html(newWeaponInfoHTML);
     });
 
 }
