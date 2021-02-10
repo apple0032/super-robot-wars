@@ -328,7 +328,11 @@ function clickBoxPlayerListener() {
         $('.box-is-player').click(function (e) {
             if ($(this).hasClass("box-is-player") === true && ( isPlayerMove === true) && ( isAiMove === false) && (isThirdMove === false)  ) {
                 ckSound();
-                openRobotMenu(e);
+                if(isDoingAttack === true && isAfterMove === true) {
+                    $("#AfterMoveMenu").css({"display": "block"});
+                } else {
+                    openRobotMenu(e);
+                }
                 closeMainMenu();
                 if (focusRobot != null) {
                     $('.available_move').unbind();
@@ -1063,6 +1067,9 @@ function getRobotAttackRange(robot) {
             isDoingAttack = false;
             $(".mapbox").removeClass("available_attack");
             $(".box_layer").css("background-color","transparent");
+            if(isAfterMove === true) {
+                $("#AfterMoveMenu").css({"display": "block"});
+            }
         }
     });
 }
