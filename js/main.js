@@ -728,6 +728,7 @@ async function botMovingMain(){
 
         updateMapViewer();
         await showTurnNotice();
+        isAfterMove = false;
     }
 }
 
@@ -1175,7 +1176,7 @@ function getAvailableCoordinate(eleX, eleY, action = "move") {
                     ((eleTop.hasClass("box-is-ai")) || (eleTop.hasClass("box-is-block")) || (eleTop.hasClass("box-is-third"))) &&
                     ((eleDown.hasClass("box-is-ai")) || (eleDown.hasClass("box-is-block")) || (eleDown.hasClass("box-is-third")))
                 ) {
-                    return currentPos;
+                    return null;
                 }
             } else {
                 if (((eleLeft.hasClass("box-is-ai")) || (eleLeft.hasClass("box-is-block"))) &&
@@ -1183,7 +1184,7 @@ function getAvailableCoordinate(eleX, eleY, action = "move") {
                     ((eleTop.hasClass("box-is-ai")) || (eleTop.hasClass("box-is-block"))) &&
                     ((eleDown.hasClass("box-is-ai")) || (eleDown.hasClass("box-is-block")))
                 ) {
-                    return currentPos;
+                    return null;
                 }
             }
         }
