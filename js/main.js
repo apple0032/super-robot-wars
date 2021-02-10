@@ -342,11 +342,13 @@ function clickBoxPlayerListener() {
                         $(".mapbox").removeClass("isFocused");
                     }
                 }
-                if (getRobotStatus(getRobotID($(this))) === false) {
-                    focusRobot = $(this);
-                    $("#player_move").removeClass("disable_move");
-                } else {
-                    $("#player_move").addClass("disable_move");
+                if( $(this).hasClass("box-is-player") ) {
+                    if (getRobotStatus(getRobotID($(this))) === false) {
+                        focusRobot = $(this);
+                        $("#player_move").removeClass("disable_move");
+                    } else {
+                        $("#player_move").addClass("disable_move");
+                    }
                 }
             }
 
@@ -1012,7 +1014,11 @@ function showWeaponList(robot) {
                 weaponHTML += '<div class="weaponList_label weaponList_range">1 - ' + v.range + '</div>';
             }
         }
-        weaponHTML += '<div class="weaponList_label weaponList_en">'+v.en+'</div>';
+        if(v.hasOwnProperty("en")) {
+            weaponHTML += '<div class="weaponList_label weaponList_en">' + v.en + '</div>';
+        } else {
+            weaponHTML += '<div class="weaponList_label weaponList_en">0</div>';
+        }
 
         if(v.hasOwnProperty("ammo")){
             weaponHTML += '<div class="weaponList_label weaponList_ammo">'+v.ammo+' / '+v.total_ammo+'</div>';
