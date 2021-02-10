@@ -1,13 +1,52 @@
 var robot = {
     'player':{
         "robotsElement" : {
-            'robotID_3_1': {x: 2, y: 2, robotID: 7, moveLevel: 5, isMoved: false, isDestroyed: false,
+            'robotID_3_1': {x: 7, y: 7, robotID: 7, moveLevel: 5, isMoved: false, isDestroyed: false,
                 weapons :[
                     {
                         "name" : "Laser Gun",
                         "power" : "3000",
                         "en" : "15",
-                        "range" : "3"
+                        "range_from": "3",
+                        "range" : "5",
+                        "ammo" : "4",
+                        "total_ammo" : "5"
+                    },
+                    {
+                        "name" : "Laser Sword",
+                        "power" : "4500",
+                        "en" : "30",
+                        "range" : "2"
+                    },
+                    {
+                        "name" : "天堂地獄",
+                        "power" : "5500",
+                        "en" : "60",
+                        "range" : "1"
+                    }
+                ]
+            },
+            'robotID_3_2': {x: 3, y: 3, robotID: 3, moveLevel: 3, isMoved: false, isDestroyed: false,
+                weapons :[
+                    {
+                        "name" : "Laser Sword",
+                        "power" : "4000",
+                        "en" : "20",
+                        "range" : "1"
+                    }
+                ]
+            },
+            'robotID_5_1': {x: 3, y: 4, robotID: 5, moveLevel: 3, isMoved: false, isDestroyed: false},
+            'robotID_5_2': {x: 10, y: 5, robotID: 6, moveLevel: 3, isMoved: false, isDestroyed: false},
+            'robotID_6': {x: 19, y: 15, robotID: 10, moveLevel: 5, isMoved: false, isDestroyed: false,
+                weapons :[
+                    {
+                        "name" : "Laser Gun",
+                        "power" : "3000",
+                        "en" : "15",
+                        "range" : "3",
+                        "ammo" : "4",
+                        "total_ammo" : "5"
                     },
                     {
                         "name" : "Laser Sword",
@@ -17,10 +56,6 @@ var robot = {
                     }
                 ]
             },
-            'robotID_3_2': {x: 3, y: 3, robotID: 3, moveLevel: 3, isMoved: false, isDestroyed: false},
-            'robotID_5_1': {x: 3, y: 4, robotID: 5, moveLevel: 3, isMoved: false, isDestroyed: false},
-            'robotID_5_2': {x: 10, y: 5, robotID: 6, moveLevel: 3, isMoved: false, isDestroyed: false},
-            'robotID_6': {x: 19, y: 15, robotID: 10, moveLevel: 5, isMoved: false, isDestroyed: false},
             'robotID_7': {x: 1, y: 3, robotID: 10, moveLevel: 3, isMoved: false, isDestroyed: false},
         }
     },

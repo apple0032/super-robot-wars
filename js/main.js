@@ -9,12 +9,17 @@ var dialogCount = 0;
 
 var isPlayerMove;   //Player turn
 var isDoingMove = false;    //Playing selecting new position to move
+var isDoingAttack = false;
+var isAfterMove = false;
 var focusRobot;
 
 var isAiMove = false;   //Enemy turn
 var isThirdMove = false;     //Third power turn
 
 var show_map_border = true;
+
+var attackRobot;
+var attackWeaponIndex;
 
 $("#newGameBtn").on("click", function() {
     ckSound();
@@ -291,8 +296,12 @@ function clickBoxPlayerListener() {
 
         $("#player_attack").unbind();
         $("#player_attack").click(function (e) {
-            getRobotAttackRange(focusRobot);
+            ckSound();
+            closeRobotMenu();
+            closeMainMenu();
+            showWeaponList(focusRobot);
         });
+
 
         $('.mapbox').unbind();
         $(".mapbox").click(function (e) {
@@ -308,7 +317,11 @@ function clickBoxPlayerListener() {
                 focusRobot = null;
                 isDoingMove = false;
             }
-            $('#afterMove_idle').click(); //idle anytime click outside after move a robot
+            if(isDoingAttack === true && isAfterMove === true) {
+                $("#AfterMoveMenu").css({"display":"block"});
+                isDoingAttack = false;
+                $(".mapbox").removeClass("available_attack");
+            }
         });
 
         $('.box-is-player').unbind();
@@ -331,6 +344,13 @@ function clickBoxPlayerListener() {
                 } else {
                     $("#player_move").addClass("disable_move");
                 }
+            }
+
+            if (isDoingMove === true && (!$(this).hasClass("available_move"))) {
+                $(".mapbox").removeClass("available_move");
+                $(".mapbox").removeClass("isFocused");
+                $(".box_layer").css("background-color","transparent");
+                isDoingMove = false;
             }
         });
 
@@ -448,15 +468,22 @@ function action(robotEle, target = "player"){
 
 }
 
-function showMove(available_pos, target = "player"){
+function showMove(available_pos, target = "player",action = "move"){
     $.each( available_pos, function( key, value ) {
         var canMovePos = "data-box-"+value.x+"-"+value.y;
+        /*
         if( (!$("."+canMovePos).hasClass("box-is-player")) && (!$("."+canMovePos).hasClass("box-is-ai"))
             && (!$("."+canMovePos).hasClass("box-is-third")) && (!$("."+canMovePos).hasClass("box-is-block"))
         ){  //Make sure position clicked dont have any robot or items etc....
+         */
             if(target === "player") {
-                $("." + canMovePos).addClass("available_move");
-                $("." + canMovePos +' .box_layer').css("background-color", "#5e8bebb5");
+                if(action === "move") {
+                    $("." + canMovePos).addClass("available_move");
+                    $("." + canMovePos + ' .box_layer').css("background-color", "#5e8bebb5");
+                } else if(action === "attack"){
+                    $("." + canMovePos).addClass("available_attack");
+                    $("." + canMovePos +' .box_layer').css("background-color", "#a21509ba");
+                }
             } else if(target === "ai") {
                 $("." + canMovePos).addClass("available_move_ai");
                 $("." + canMovePos +' .box_layer').css("background-color", "#d83c2fba");
@@ -464,7 +491,6 @@ function showMove(available_pos, target = "player"){
                 $("." + canMovePos).addClass("available_move_third");
                 $("." + canMovePos +' .box_layer').css("background-color", "rgba(255, 225, 46, 0.73)");
             }
-        }
     });
 
     if(target === "player") {
@@ -484,6 +510,7 @@ function robotMoveToNewPoint(movedPosEle,robotEle, target = "player") {
 
     //Confirm to move a new pos
     isDoingMove = false;
+    isAfterMove = true;
 
     //Get robot data
     var robotID = getRobotID($(robotEle));
@@ -560,12 +587,17 @@ function robotMoveToNewPoint(movedPosEle,robotEle, target = "player") {
             $('#afterMove_attack').unbind();
             $('#afterMove_attack').click(function () {
                 ckSound();
-                attackAfterMove(movedPosEle);
+                //attackAfterMove(movedPosEle);
+
+                closeRobotMenu();
+                closeMainMenu();
+                showWeaponList(movedPosEle);
             });
 
             $('#afterMove_cancel').unbind();
             $('#afterMove_cancel').click(function () {
                 ckSound();
+                isAfterMove = false;
                 $(robotEle).append("<img class='is_robot' src='./assets/robot"+RobotData.robotID+".png' data-robot='"+robotID+"' draggable='false'>");
                 $(robotEle).addClass("box-is-player");
 
@@ -588,10 +620,14 @@ function robotMoveToNewPoint(movedPosEle,robotEle, target = "player") {
 }
 
 function openRobotMenu(e) {
-    closeAfterMoveMenu();
-    mouseX =  ((e.pageX) + 5) + "px";
-    mouseY = ((e.pageY) + 5) + "px";
-    $("#contextMenu").css({"display":"block", "left" : mouseX, "top" : mouseY});
+    if($("#AfterMoveMenu").is(":visible")){
+        $("#afterMove_cancel").click();
+    } else {
+        closeAfterMoveMenu();
+        mouseX = ((e.pageX) + 5) + "px";
+        mouseY = ((e.pageY) + 5) + "px";
+        $("#contextMenu").css({"display": "block", "left": mouseX, "top": mouseY});
+    }
 }
 
 function closeRobotMenu() {
@@ -622,11 +658,13 @@ function closeMainMenu() {
 function disablePlayerActivity() {
     $("#MainMenu").css("pointer-events","none");
     $("#mainMap").css("pointer-events","none");
+    $("#contextMenu").css("pointer-events","none");
 }
 
 function enablePlayerActivity() {
     $("#MainMenu").css("pointer-events","auto");
     $("#mainMap").css("pointer-events","auto");
+    $("#contextMenu").css("pointer-events","auto");
 }
 
 
@@ -881,25 +919,28 @@ function getMapInformation() {
 }
 
 async function showTurnNotice() {
+    var left = $(".data-box-13-9")[0].offsetLeft;
+    $("#turn_notice").css("left",left);
+
     if(isPlayerMove === true){
         $("#map").css("filter","blur(3px)");
         $("#turn_notice").html("我方回合");
         $("#turn_notice").css("background-color","rgb(35 105 243)");
-        $("#turn_notice").fadeIn();
+        $("#turn_notice").show();
     }
 
     if(isAiMove === true){
         $("#map").css("filter","blur(3px)");
         $("#turn_notice").html("敵方回合");
         $("#turn_notice").css("background-color","rgb(193 61 51)");
-        $("#turn_notice").fadeIn();
+        $("#turn_notice").show();
     }
 
     if(isThirdMove === true){
         $("#map").css("filter","blur(3px)");
         $("#turn_notice").html("友軍回合");
         $("#turn_notice").css("background-color","rgb(226 179 36)");
-        $("#turn_notice").fadeIn();
+        $("#turn_notice").show();
     }
 
 
@@ -936,12 +977,94 @@ function getRobotCanAttack(robot, target = "player") {
     return false;
 }
 
+function showWeaponList(robot) {
+    $(".mapbox").removeClass("available_attack");
+    var attackRobotID = getRobotID(robot);
+    var attackRobotData = getRobotData(attackRobotID);
+
+    $(robot).addClass("isFocused");
+
+    $("#MainMenu").css("pointer-events","none");
+    $("#contextMenu").css("pointer-events","none");
+    $("#map").css("filter","blur(1px)");
+
+    $("#WeaponMenu").show();
+    $('#WeaponMenu').attr("data-robot",attackRobotID);
+
+
+    $(".weaponList_weapons").html("");
+    var weaponHTML = "";
+    $.each( attackRobotData.weapons, function( k, v ) {
+        weaponHTML += '<div class="weaponList_item">';
+        weaponHTML += '<div class="weaponList_label weaponList_weapon">'+v.name+'</div>';
+        weaponHTML += '<div class="weaponList_label weaponList_power">'+v.power+'</div>';
+        if(v.range === "1"){
+            weaponHTML += '<div class="weaponList_label weaponList_range">'+v.range+'</div>';
+        } else {
+            if(v.hasOwnProperty("range_from")){
+                weaponHTML += '<div class="weaponList_label weaponList_range">'+v.range_from+' - ' + v.range + '</div>';
+            } else {
+                weaponHTML += '<div class="weaponList_label weaponList_range">1 - ' + v.range + '</div>';
+            }
+        }
+        weaponHTML += '<div class="weaponList_label weaponList_en">'+v.en+'</div>';
+
+        if(v.hasOwnProperty("ammo")){
+            weaponHTML += '<div class="weaponList_label weaponList_ammo">'+v.ammo+' / '+v.total_ammo+'</div>';
+        } else {
+            weaponHTML += '<div class="weaponList_label weaponList_ammo"> / </div>';
+        }
+
+        weaponHTML += '</div>';
+    });
+
+    $(".weaponList_weapons").append(weaponHTML);
+
+    $(".fa-window-close").unbind();
+    $(".fa-window-close").click(function (e) {
+        $(this).parent().parent().hide();
+        enablePlayerActivity();
+        $("#map").css("filter","none");
+        $(robot).removeClass("isFocused");
+        isDoingAttack = false;
+    });
+
+    $(".weaponList_item").unbind();
+    $(".weaponList_item").click(function (e) {
+        attackRobot = attackRobotID;
+        attackWeaponIndex = $(this).index();
+        $(".fa-window-close").click();
+        getRobotAttackRange(robot);
+        closeAfterMoveMenu();
+    });
+
+}
+
 function getRobotAttackRange(robot) {
     var attackRobotID = getRobotID(robot);
     var attackRobotData = getRobotData(attackRobotID);
 
-    ll(robot);
-    ll(attackRobotData);
+    var available_pos = getAvailableCoordinate(attackRobotData.x, attackRobotData.y, "attack");
+    showMove(available_pos, "player","attack");
+
+    isDoingMove = true;
+    isDoingAttack = true;
+
+    $(".available_attack").unbind();
+    $('.available_attack').click(function() {
+        if($(this).hasClass("available_attack")) {
+            if($(this).hasClass("box-is-ai") || $(this).hasClass("box-is-third")) {
+                ll("ATT");
+                ll($(this));
+                ll(attackRobotData);
+                ll(attackWeaponIndex);
+            }
+        } else {
+            isDoingAttack = false;
+            $(".mapbox").removeClass("available_attack");
+            $(".box_layer").css("background-color","transparent");
+        }
+    });
 }
 
 function getCoordinateByEle(ele) {
@@ -1023,16 +1146,16 @@ function getMiddle(array, i = 0) {
 
 function getAvailableCoordinate(eleX, eleY, action = "move") {
     var currentPos = [{x: eleX, y: eleY}];
+    var ele = $(".data-box-" + eleX + "-" + eleY);
+    var eleType = getRobotType(ele);
+    var isThirdAlly = robot.third.isAlly;
 
     if( action === "move") {
         //check the element around the target in four directions, block if robot surrounded by item and enemy when doing move
-        var ele = $(".data-box-" + eleX + "-" + eleY);
         var eleLeft = ($(".data-box-" + (eleX - 1) + "-" + eleY));
         var eleRight = ($(".data-box-" + (eleX + 1) + "-" + eleY));
         var eleTop = ($(".data-box-" + eleX + "-" + (eleY - 1)));
         var eleDown = ($(".data-box-" + eleX + "-" + (eleY + 1)));
-        var eleType = getRobotType(ele);
-        var isThirdAlly = robot.third.isAlly;
 
         if ((eleLeft.hasClass("box-is-block")) && (eleRight.hasClass("box-is-block")) && (eleTop.hasClass("box-is-block")) && (eleDown.hasClass("box-is-block"))) {
             return null;
@@ -1092,23 +1215,35 @@ function getAvailableCoordinate(eleX, eleY, action = "move") {
     var robotID = getRobotID(ele);
     var robotData = getRobotData(robotID,eleType);
     var robotRange;
+    var rangeStart = 0;
+
     if(action === "move") {
         robotRange = robotData.moveLevel;
+    } else if(action === "attack") {
+        robotRange = robotData.weapons[attackWeaponIndex]["range"];
+        if(robotData.weapons[attackWeaponIndex].hasOwnProperty("range_from")){
+            rangeStart = robotData.weapons[attackWeaponIndex]["range_from"];
+        }
     }
+    rangeStart = parseInt(rangeStart) - 1;
 
     var avail_coordinate = [];
     var available_pos = [];
     avail_coordinate.push(eleX);
     avail_coordinate.push(eleY);
     for (i = 1; i <= robotRange; i++) {
-        available_pos.push({x: parseInt(eleX), y:parseInt(eleY) + i});
-        available_pos.push({x: parseInt(eleX), y:parseInt(eleY) - i});
+        if( i > rangeStart) {
+            available_pos.push({x: parseInt(eleX), y: parseInt(eleY) + i});
+            available_pos.push({x: parseInt(eleX), y: parseInt(eleY) - i});
+        }
         avail_coordinate.push(parseInt(eleY) + i);
         avail_coordinate.push(parseInt(eleY) - i);
     }
     for (i = 1; i <= robotRange; i++) {
-        available_pos.push({x: parseInt(eleX) + i , y:parseInt(eleY)});
-        available_pos.push({x: parseInt(eleX) - i, y:parseInt(eleY)});
+        if( i > rangeStart) {
+            available_pos.push({x: parseInt(eleX) + i, y: parseInt(eleY)});
+            available_pos.push({x: parseInt(eleX) - i, y: parseInt(eleY)});
+        }
         avail_coordinate.push(parseInt(eleX) + i);
         avail_coordinate.push(parseInt(eleX) - i);
     }
@@ -1132,7 +1267,9 @@ function getAvailableCoordinate(eleX, eleY, action = "move") {
 
         var distance = distance_x + distance_y;
         if(distance <= robotRange){
-            available_pos.push({x: value.x  , y:value.y});
+            if(distance > rangeStart) {
+                available_pos.push({x: value.x, y: value.y});
+            }
         }
     });
 
@@ -1144,10 +1281,27 @@ function getAvailableCoordinate(eleX, eleY, action = "move") {
     var newAvailable_pos = [];
     $.each( available_pos, function( key, value ) {
         var ele = $(".data-box-" + value.x + "-" + value.y);
-        if( (!ele.hasClass("box-is-player")) && (!ele.hasClass("box-is-ai")) &&
-            (!ele.hasClass("box-is-third")) && (!ele.hasClass("box-is-block")) && (ele.length > 0)
-        ){
-            newAvailable_pos.push(value);
+
+        if(action === "move") {
+            if ((!ele.hasClass("box-is-player")) && (!ele.hasClass("box-is-ai")) &&
+                (!ele.hasClass("box-is-third")) && (!ele.hasClass("box-is-block")) && (ele.length > 0)
+            ) {
+                newAvailable_pos.push(value);
+            }
+        }
+
+        if(action === "attack") {
+            if(isThirdAlly === false) {
+                if ((!ele.hasClass("box-is-player")) && (!ele.hasClass("box-is-block")) && (ele.length > 0)
+                ) {
+                    newAvailable_pos.push(value);
+                }
+            } else {
+                if ((!ele.hasClass("box-is-player")) && (!ele.hasClass("box-is-third")) && (!ele.hasClass("box-is-block")) && (ele.length > 0)
+                ) {
+                    newAvailable_pos.push(value);
+                }
+            }
         }
     });
 

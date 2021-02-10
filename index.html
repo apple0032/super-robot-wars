@@ -12,6 +12,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
   <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon_io/favicon-32x32.png">
 </head>
 
@@ -34,7 +35,7 @@
     </div>
 
 
-    <div id="turn_notice"></div>
+    <div id="turn_notice" class="animate__animated animate__lightSpeedInRight animate__faster"></div>
 
     <div class="warning-notice">
       <section class="message warning">
@@ -71,6 +72,17 @@
         <li id="mainMenu_purpose"><div class="player_menu_text">作戰目的</div></li>
         <li id="mainMenu_setting"><div class="player_menu_text">系統設定</div></li>
       </ul>
+    </div>
+
+    <div id="WeaponMenu" class="animate__animated animate__fadeInDown animate__faster" data-robot="">
+      <div class="WeaponMenu_bar">
+        武器選擇<i class="far fa-window-close"></i>
+      </div>
+      <div class="weaponList">
+        <div class="weaponList_label weaponList_weapon">武器</div><div class="weaponList_label weaponList_power">攻擊力</div><div class="weaponList_label weaponList_range">距離</div><div class="weaponList_label weaponList_en">EN</div><div class="weaponList_label weaponList_ammo">彈藥</div>
+        <hr>
+        <div class="weaponList_weapons"></div>
+      </div>
     </div>
 
   </main>
