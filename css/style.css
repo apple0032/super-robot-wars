@@ -128,8 +128,8 @@ body {
   /*top: 25%;*/
   left: 50%;
   width: 500px;
-  height: 400px;
-  background: #d3d3d3e6;
+  height: 415px;
+  background: #d3d3d3c4;
   border: 1px solid #505050;
   font-family: 'Noto Serif JP', serif;
   border-radius: 5px;
@@ -137,6 +137,7 @@ body {
   color: black;
   font-size: 18px;
   margin-left: -280px;
+  zoom: 1.1;
 }
 
 .WeaponMenu_bar{
@@ -196,11 +197,18 @@ body {
   /*font-style: italic;*/
 }
 
+.weaponInfoItem img{
+  width: 15px;
+  height: 15px;
+  margin-top: -5px;
+}
+
 .weaponEffectBox{
   width: 100%;
   height: 95px;
   border-radius: 10px;
   border: 1px solid #9c9c9c;
+  padding: 5px;
 }
 
 .Weapon_symbol{
@@ -253,8 +261,8 @@ body {
 }
 
 .not_allowed_weapon{
-  background-color: gray;
-  color: #636363;
+  background-color: #8080807d;
+  color: #8a8a8a;
   cursor: not-allowed;
 }
 
@@ -264,12 +272,16 @@ body {
   padding-left: 10px;
 }
 
+.weaponList_property{
+  width: 65px;
+}
+
 .weaponList_weapon{
-  width: 200px;
+  width: 170px;
 }
 
 .weaponList_power{
-  width: 90px;
+  width: 80px;
 }
 
 .weaponList_range{
@@ -287,6 +299,15 @@ body {
 
 .available_attack{
   cursor: pointer;
+}
+
+.progress{
+  margin-bottom: 5px !important;
+  height: 16px !important;
+}
+
+.progress-bar{
+  background-color: #808080 !important;
 }
 
 #turn_notice {

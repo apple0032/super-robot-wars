@@ -3,7 +3,7 @@ var robot = {
         "robotsElement" : {
             'robotID_3_1': {x: 7, y: 7, robotID: 10, moveLevel: 5, isMoved: false, isDestroyed: false,
                 morale : 100,
-                weaponsLv : 2,
+                weaponsLv : 3,
                 weapons :[
                     {
                         "name" : "吐口水",
