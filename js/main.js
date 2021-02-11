@@ -592,6 +592,13 @@ function robotMoveToNewPoint(movedPosEle,robotEle, target = "player") {
             $('#afterMove_idle').click(function () {
                 ckSound();
                 closeAfterMoveMenu();
+                isAfterMove = false;
+                isDoingAttack = false;
+
+                $("#map").css("filter","none");
+                $(robotEle).removeClass("isFocused");
+                $(".mapbox").removeClass("available_attack");
+                $(".box_layer").css("background-color","transparent");
             });
 
             $('#afterMove_attack').unbind();
@@ -621,6 +628,7 @@ function robotMoveToNewPoint(movedPosEle,robotEle, target = "player") {
 
                 closeAfterMoveMenu();
                 clickBoxPlayerListener();
+                updateMapViewer();
             });
 
             updateMapViewer();
