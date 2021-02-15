@@ -473,7 +473,21 @@ function action(robotEle, target = "player"){
     showMove(available_pos, target);
 
     if(target === "player") {
-        moveListener();
+        $('.available_move').unbind();
+        $('.available_move').click(function() {
+
+            var canMove = false;
+            var clickPos = getCoordinateByEle($(this));
+            $.each( available_pos, function( key, value ) {
+                if( (value.x === parseInt(clickPos[0])) && (value.y === parseInt(clickPos[1])) ){
+                    canMove = true;
+                }
+            });
+
+            if( ($(this).hasClass("available_move")) && (canMove === true) ) {
+                robotMoveToNewPoint($(this),focusRobot)
+            }
+        });
     }
 
 }
@@ -508,13 +522,7 @@ function showMove(available_pos, target = "player",action = "move"){
     }
 }
 
-function moveListener() {
-    $('.available_move').click(function() {
-        if($(this).hasClass("available_move")) {
-            robotMoveToNewPoint($(this),focusRobot)
-        }
-    });
-}
+
 
 function robotMoveToNewPoint(movedPosEle,robotEle, target = "player") {
 
@@ -1000,6 +1008,7 @@ function showWeaponList(robotEle,type = "attack") {
     $(".mapbox").removeClass("available_attack");
     var attackRobotID = getRobotID(robotEle);
     var attackRobotData = getRobotData(attackRobotID);
+    var not_allowed_weapon = [];
 
     $(robotEle).addClass("isFocused");
 
@@ -1017,9 +1026,11 @@ function showWeaponList(robotEle,type = "attack") {
         var addClass = "";
         if( (parseInt(v.ammo) === 0) || ( attackRobotData.morale < v.morale ) ){
             addClass = "not_allowed_weapon";
+            not_allowed_weapon.push(k);
         }
         if( (isAfterMove === true) && (v.afterMove === false) ){
             addClass = "not_allowed_weapon";
+            not_allowed_weapon.push(k);
         }
 
         weaponHTML += '<div class="weaponList_item '+addClass+'">';
@@ -1072,7 +1083,7 @@ function showWeaponList(robotEle,type = "attack") {
     if(type === "attack") {
         $(".weaponList_item").unbind();
         $(".weaponList_item").click(function (e) {
-            if ((!$(this).hasClass("not_allowed_weapon"))) {
+            if ( (!$(this).hasClass("not_allowed_weapon")) && (not_allowed_weapon.includes($(this).index()) === false) ) {
                 attackRobot = attackRobotID;
                 attackWeaponIndex = $(this).index();
                 $(".fa-window-close").click();
@@ -1178,7 +1189,16 @@ function getRobotAttackRange(robot) {
 
     $(".available_attack").unbind();
     $('.available_attack').click(function() {
-        if($(this).hasClass("available_attack")) {
+
+        var canAttack = false;
+        var clickPos = getCoordinateByEle($(this));
+        $.each( available_pos, function( key, value ) {
+            if( (value.x === parseInt(clickPos[0])) && (value.y === parseInt(clickPos[1])) ){
+                canAttack = true;
+            }
+        });
+
+        if( ($(this).hasClass("available_attack")) && (canAttack === true) ) {
             if($(this).hasClass("box-is-ai") || $(this).hasClass("box-is-third")) {
                 ll("ATT");
                 ll($(this));

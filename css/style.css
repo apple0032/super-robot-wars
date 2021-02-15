@@ -127,8 +127,8 @@ body {
   position: absolute;
   /*top: 25%;*/
   left: 50%;
-  width: 500px;
-  height: 415px;
+  width: 600px;
+  height: 470px;
   background: #d3d3d3c4;
   border: 1px solid #505050;
   font-family: 'Noto Serif JP', serif;
@@ -136,8 +136,8 @@ body {
   --animate-duration: 0.6s;
   color: black;
   font-size: 18px;
-  margin-left: -280px;
-  zoom: 1.1;
+  margin-left: -340px;
+  /*zoom: 1.1;*/
 }
 
 .WeaponMenu_bar{
@@ -148,28 +148,28 @@ body {
 .WeaponMenu_bar i{
   cursor: pointer;
   position: absolute;
-  left: 470px;
+  left: 570px;
   font-size: 25px;
   color: #585858;
 }
 
 .weaponList{
-  height: 200px;
+  height: 230px;
   overflow-y: scroll;
   border-bottom: 1px solid #31313173;
   padding-bottom: 5px;
 }
 
 .weaponInfo{
-  width: 98%;
   margin: 5px 3px 0 3px;
-  font-size: 16px;
+  font-size: 15px;
   padding-left: 10px;
   padding-right: 10px;
   border: 1px solid #afafaf;
   border-radius: 5px;
   color: #353535;
   background: #cacaca;
+  height: 200px;
 }
 
 .weaponInfo_left{
@@ -205,7 +205,7 @@ body {
 
 .weaponEffectBox{
   width: 100%;
-  height: 95px;
+  height: 115px;
   border-radius: 10px;
   border: 1px solid #9c9c9c;
   padding: 5px;
@@ -273,11 +273,11 @@ body {
 }
 
 .weaponList_property{
-  width: 65px;
+  width: 100px;
 }
 
 .weaponList_weapon{
-  width: 170px;
+  width: 230px;
 }
 
 .weaponList_power{
