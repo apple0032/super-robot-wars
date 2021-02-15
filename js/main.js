@@ -1200,10 +1200,31 @@ function getRobotAttackRange(robot) {
 
         if( ($(this).hasClass("available_attack")) && (canAttack === true) ) {
             if($(this).hasClass("box-is-ai") || $(this).hasClass("box-is-third")) {
-                ll("ATT");
-                ll($(this));
-                ll(attackRobotData);
-                ll(attackWeaponIndex);
+
+                var targetEle = $(this);
+
+                //Display attack animation
+                var attackerEle = $(".data-box-"+attackRobotData.x+"-"+attackRobotData.y);
+                var xSource =  ($(attackerEle).find(".is_robot"))[0].offsetLeft;
+                var ySource =  ($(attackerEle).find(".is_robot"))[0].offsetTop;
+                var xTarget = ($(this)[0].offsetLeft)+2;
+                var yTarget = $(this)[0].offsetTop;
+
+                var swingRobot =  '<img src="./assets/fight.png" draggable="false" class="flashRobot">';
+                $(attackerEle).append(swingRobot);
+
+                $(attackerEle).find(".flashRobot").css({"position":"absolute", "left": xSource, "top" : ySource ,"filter" : "grayscale(1)", "z-index" : 999});
+                ($(attackerEle).find(".flashRobot")).animate({left: xTarget, top: yTarget}, animationTime, "swing");
+
+                setTimeout(function() {
+                    $(attackerEle).find(".flashRobot").remove();
+                    $(".mapbox").removeClass("available_attack");
+                    $(".box_layer").css("background-color","transparent");
+
+                    ll(targetEle); ll(attackRobotData); ll(attackWeaponIndex);
+
+
+                }, (animationTime + 100) );
             }
         } else {
             isDoingAttack = false;
