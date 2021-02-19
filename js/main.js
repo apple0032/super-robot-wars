@@ -152,7 +152,7 @@ function createMap(size = 12){
         mapViewer += '<br><br>';
         mapViewer += '<i class="fas fa-chess-rook" data-toggle="tooltip" title="敵方兵力"></i><br>';
         mapViewer += '<div class="ai_robot_remain"></div>';
-        if ('third' in robot) {
+        if (robot.third.hasOwnProperty("robotsElement") && Object.entries(robot.third.robotsElement).length > 0) {
             mapViewer += '<br><br>';
             mapViewer += '<i class="fas fa-chess-queen" data-toggle="tooltip" title="友軍勢力"></i><br>';
             mapViewer += '<div class="third_robot_remain"></div>';
@@ -740,7 +740,7 @@ async function botMovingMain(){
     await delay(500);   //AI回合end, wait a moment....
 
     //3. Check if 第三方勢力(third) existed, if yes run third turn
-    if ('robotsElement' in robot.third) {
+    if (robot.third.hasOwnProperty("robotsElement") && Object.entries(robot.third.robotsElement).length > 0) {
         if(isPlayerMove === false) {
             await thirdMove();
         }
