@@ -20,6 +20,7 @@ var show_map_border = true;
 
 var attackRobot;
 var attackWeaponIndex;
+var isThirdAlly = robot.third.isAlly;
 
 $("#newGameBtn").on("click", function() {
     ckSound();
@@ -611,32 +612,37 @@ function robotMoveToNewPoint(movedPosEle,robotEle, target = "player") {
 
             $('#afterMove_attack').unbind();
             $('#afterMove_attack').click(function () {
-                ckSound();
-                //attackAfterMove(movedPosEle);
-
-                closeRobotMenu();
-                closeMainMenu();
-                showWeaponList(movedPosEle);
+                if(isAfterMove === true) {
+                    ckSound();
+                    closeRobotMenu();
+                    closeMainMenu();
+                    showWeaponList(movedPosEle);
+                    //attackAfterMove(movedPosEle);
+                }
             });
 
             $('#afterMove_cancel').unbind();
             $('#afterMove_cancel').click(function () {
-                ckSound();
-                isAfterMove = false;
-                $(robotEle).append("<img class='is_robot' src='./assets/robot"+RobotData.robotID+".png' data-robot='"+robotID+"' draggable='false'>");
-                $(robotEle).addClass("box-is-player");
+                if(isAfterMove === true) {
+                    ckSound();
+                    isAfterMove = false;
+                    $(robotEle).append("<img class='is_robot' src='./assets/robot" + RobotData.robotID + ".png' data-robot='" + robotID + "' draggable='false'>");
+                    $(robotEle).addClass("box-is-player");
 
-                $(movedPosEle).find(".is_robot").remove();
-                $(movedPosEle).removeClass("box-is-player");
+                    $(movedPosEle).find(".is_robot").remove();
+                    $(movedPosEle).removeClass("box-is-player");
 
-                var oldCoordinate = getCoordinateByEle(robotEle);
-                robot[target]["robotsElement"][robotID]["x"] = parseInt(oldCoordinate[0]);
-                robot[target]["robotsElement"][robotID]["y"] = parseInt(oldCoordinate[1]);
-                robot[target]["robotsElement"][robotID]["isMoved"] = false;
+                    var oldCoordinate = getCoordinateByEle(robotEle);
+                    robot[target]["robotsElement"][robotID]["x"] = parseInt(oldCoordinate[0]);
+                    robot[target]["robotsElement"][robotID]["y"] = parseInt(oldCoordinate[1]);
+                    robot[target]["robotsElement"][robotID]["isMoved"] = false;
 
-                closeAfterMoveMenu();
-                clickBoxPlayerListener();
-                updateMapViewer();
+                    closeAfterMoveMenu();
+                    clickBoxPlayerListener();
+                    updateMapViewer();
+                } else {
+                    ll("Don't cheat!");
+                }
             });
 
             updateMapViewer();
@@ -734,7 +740,7 @@ async function botMovingMain(){
     await delay(500);   //AI回合end, wait a moment....
 
     //3. Check if 第三方勢力(third) existed, if yes run third turn
-    if ('third' in robot) {
+    if ('robotsElement' in robot.third) {
         if(isPlayerMove === false) {
             await thirdMove();
         }
@@ -766,11 +772,11 @@ async function aiMove() {
         for (const value of Object.keys(aiRobot)) {
             var currentRobot = aiRobot[value];
             if(isPlayerMove === false && currentRobot.isMoved === false && currentRobot.isDestroyed === false) {
-                while (currentRobot.isMoved === false) {
+                while (currentRobot.isMoved === false && isPlayerMove === false) {
                     var targetRobot = robot.player.robotsElement.robotID_6;
 
                     //1.Find attack target, if yes stop moving, do attack
-                    var canAttack = getRobotCanAttack(currentRobot, "ai");
+                    var canAttack = aiAttackAction(currentRobot, "ai","before");
 
                     //2.Find move pos
                     if (canAttack === false) {
@@ -800,6 +806,8 @@ async function aiMove() {
                                 robotMoveToNewPoint($(".data-box-" + currentRobot.x + "-" + currentRobot.y), $(".data-box-" + currentRobot.x + "-" + currentRobot.y), "ai");
                             }, movingTime);
                         }
+                    } else {
+                        isPlayerMove = true;
                     }
 
                     await delay(movingTime + 500);
@@ -998,10 +1006,47 @@ function resetMap(resetRobotStatus = false) {
     }
 }
 
-function getRobotCanAttack(robot, target = "player") {
-    //ll(robot);
+function aiAttackAction(robotEle, target = "player",status) {
 
-    return false;
+    var doAttack = false;
+
+    if(robotEle.hasOwnProperty("weapons")){
+        var aiWeapons = [...robotEle.weapons];
+        aiWeapons.reverse();    //Default begin with the highest power weapon
+
+        $.each( aiWeapons, function( k, v ) {
+            //Validate weapon EN,morale,ammo,afterMove etc......
+            var canAttack = true;
+            if(1 > 2){
+                canAttack = false;
+            }
+
+            if(canAttack === true) {
+                attackWeaponIndex = (aiWeapons.length - 1 - k); //Get original index from reversed array
+                var available_pos = getAvailableCoordinate(robotEle.x, robotEle.y, "attack");
+                var available_target_num = 0;
+                var available_target = [];
+
+                $.each(available_pos, function (k2, v2) {
+                    var enemy = $(".data-box-" + v2.x + "-" + v2.y);
+                    if ((enemy.hasClass("box-is-player")) || (enemy.hasClass("box-is-third"))) {
+                        available_target_num++;
+                        available_target.push({x: v2.x, y: v2.y});
+                    }
+                });
+
+                if( available_target.length > 0 ) {
+                    ll(available_target);
+                    ll(v);
+                    doAttack = true;
+                    return false;
+                }
+            }
+
+        });
+    }
+
+    return doAttack;
 }
 
 function showWeaponList(robotEle,type = "attack") {
@@ -1318,7 +1363,6 @@ function getAvailableCoordinate(eleX, eleY, action = "move") {
     var currentPos = [{x: eleX, y: eleY}];
     var ele = $(".data-box-" + eleX + "-" + eleY);
     var eleType = getRobotType(ele);
-    var isThirdAlly = robot.third.isAlly;
 
     if( action === "move") {
         //check the element around the target in four directions, block if robot surrounded by item and enemy when doing move
@@ -1461,15 +1505,41 @@ function getAvailableCoordinate(eleX, eleY, action = "move") {
         }
 
         if(action === "attack") {
-            if(isThirdAlly === false) {
-                if ((!ele.hasClass("box-is-player")) && (!ele.hasClass("box-is-block")) && (ele.length > 0)
-                ) {
-                    newAvailable_pos.push(value);
+            if(eleType === "player") {
+                if (isThirdAlly === false) {
+                    if ((!ele.hasClass("box-is-player")) && (!ele.hasClass("box-is-block")) && (ele.length > 0)
+                    ) {
+                        newAvailable_pos.push(value);
+                    }
+                } else {
+                    if ((!ele.hasClass("box-is-player")) && (!ele.hasClass("box-is-third")) && (!ele.hasClass("box-is-block")) && (ele.length > 0)
+                    ) {
+                        newAvailable_pos.push(value);
+                    }
+                }
+            } else if(eleType === "ai") {
+                if (isThirdAlly === true) {
+                    if ((!ele.hasClass("box-is-ai")) && (!ele.hasClass("box-is-block")) && (ele.length > 0)
+                    ) {
+                        newAvailable_pos.push(value);
+                    }
+                } else {
+                    if ((!ele.hasClass("box-is-ai")) && (!ele.hasClass("box-is-third")) && (!ele.hasClass("box-is-block")) && (ele.length > 0)
+                    ) {
+                        newAvailable_pos.push(value);
+                    }
                 }
             } else {
-                if ((!ele.hasClass("box-is-player")) && (!ele.hasClass("box-is-third")) && (!ele.hasClass("box-is-block")) && (ele.length > 0)
-                ) {
-                    newAvailable_pos.push(value);
+                if (isThirdAlly === true) {
+                    if ((!ele.hasClass("box-is-third")) && (!ele.hasClass("box-is-block")) && (!ele.hasClass("box-is-player")) && (ele.length > 0)
+                    ) {
+                        newAvailable_pos.push(value);
+                    }
+                } else {
+                    if ( (!ele.hasClass("box-is-third")) && (!ele.hasClass("box-is-block")) && (ele.length > 0)
+                    ) {
+                        newAvailable_pos.push(value);
+                    }
                 }
             }
         }
