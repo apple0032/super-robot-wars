@@ -1036,8 +1036,20 @@ function aiAttackAction(robotEle, target = "player",status) {
                 });
 
                 if( available_target.length > 0 ) {
-                    ll(available_target);
-                    ll(v);
+                    //ll(available_target);
+                    //ll(v);
+
+                    var attackerEle =  $(".data-box-" + robotEle.x + "-" + robotEle.y);
+                    var targetEle   =  $(".data-box-" + available_target[0].x + "-" + available_target[0].y);
+                    showAttackAnimation(attackerEle,targetEle);
+                    setTimeout(function() {
+                        $(attackerEle).find(".flashRobot").remove();
+                        $(".box_layer").css("background-color","transparent");
+                        disablePlayerActivity();
+                        console.log("ai attack!")
+
+                    }, (animationTime + 100) );
+
                     doAttack = true;
                     return false;
                 }
@@ -1247,19 +1259,9 @@ function getRobotAttackRange(robot) {
             if($(this).hasClass("box-is-ai") || $(this).hasClass("box-is-third")) {
 
                 var targetEle = $(this);
-
-                //Display attack animation
                 var attackerEle = $(".data-box-"+attackRobotData.x+"-"+attackRobotData.y);
-                var xSource =  ($(attackerEle).find(".is_robot"))[0].offsetLeft;
-                var ySource =  ($(attackerEle).find(".is_robot"))[0].offsetTop;
-                var xTarget = ($(this)[0].offsetLeft)+2;
-                var yTarget = $(this)[0].offsetTop;
-
-                var swingRobot =  '<img src="./assets/fight.png" draggable="false" class="flashRobot">';
-                $(attackerEle).append(swingRobot);
-
-                $(attackerEle).find(".flashRobot").css({"position":"absolute", "left": xSource, "top" : ySource ,"filter" : "grayscale(1)", "z-index" : 999});
-                ($(attackerEle).find(".flashRobot")).animate({left: xTarget, top: yTarget}, animationTime, "swing");
+                //Display attack animation
+                showAttackAnimation(attackerEle,targetEle);
 
                 setTimeout(function() {
                     $(attackerEle).find(".flashRobot").remove();
@@ -1280,6 +1282,19 @@ function getRobotAttackRange(robot) {
             }
         }
     });
+}
+
+function showAttackAnimation(attackerEle,targetEle) {
+    var xSource =  ($(attackerEle).find(".is_robot"))[0].offsetLeft;
+    var ySource =  ($(attackerEle).find(".is_robot"))[0].offsetTop;
+    var xTarget = (targetEle[0].offsetLeft)+2;
+    var yTarget = targetEle[0].offsetTop;
+
+    var swingRobot =  '<img src="./assets/fight.png" draggable="false" class="flashRobot">';
+    $(attackerEle).append(swingRobot);
+
+    $(attackerEle).find(".flashRobot").css({"position":"absolute", "left": xSource, "top" : ySource ,"filter" : "grayscale(1)", "z-index" : 999});
+    ($(attackerEle).find(".flashRobot")).animate({left: xTarget, top: yTarget}, animationTime, "swing");
 }
 
 function getCoordinateByEle(ele) {
@@ -1714,5 +1729,18 @@ function ll(log){
     console.log(log);
 }
 
+
+
+if(window.devtools.isOpen === true){
+    //$("#main-container").remove();
+}
+
+window.addEventListener('devtoolschange', event => {
+    console.log('Is DevTools open:', event.detail.isOpen);
+    //console.log('DevTools orientation:', event.detail.orientation);
+    if(event.detail.isOpen === true){
+        //$("#main-container").remove();
+    }
+});
 
 //Test github in other workplace 2021-02-08
