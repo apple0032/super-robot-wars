@@ -6,3 +6,4 @@ storage/
 .idea
 .htaccess
 /assets
+env.js

@@ -714,8 +714,14 @@ function activeMainMenuListener() {
     });
 
     //Control key down "Z" to enable developer mode
-    $(document).keypress(function(event){var keycode = (event.keyCode ? event.keyCode : event.which);if(keycode == "122"){$('#developer-btn').click();}});
-
+    if(APP_DEVELOPER === "ON") {
+        $(document).keypress(function (event) {
+            var keycode = (event.keyCode ? event.keyCode : event.which);
+            if (keycode == "122") {
+                $('#developer-btn').click();
+            }
+        });
+    }
     //Skip the right click action under development
     //$("#map").on('contextmenu', function (e) { e.stopPropagation(); });
 
@@ -1660,6 +1666,11 @@ function getRobotDataByID(target){
     return dialog_target;
 }
 
+const delay = ms => new Promise(res => setTimeout(res, ms));
+
+function onlyUnique(value, index, self) {
+    return self.indexOf(value) === index;
+}
 
 
 
@@ -1667,6 +1678,15 @@ function getRobotDataByID(target){
 
 
 
+
+
+
+
+
+
+
+
+/*********************** ENVIRONMENT  RELATED ***********************/
 
 
 //Listen for screen width size
@@ -1687,14 +1707,6 @@ $(window).on('resize', function(){
 window.onerror = function(error, url, line) {
     ll("error occur!");
 };
-
-
-
-const delay = ms => new Promise(res => setTimeout(res, ms));
-
-function onlyUnique(value, index, self) {
-    return self.indexOf(value) === index;
-}
 
 
 /* Developer mode button */
@@ -1730,17 +1742,18 @@ function ll(log){
 }
 
 
-
-if(window.devtools.isOpen === true){
-    //$("#main-container").remove();
-}
-
-window.addEventListener('devtoolschange', event => {
-    console.log('Is DevTools open:', event.detail.isOpen);
-    //console.log('DevTools orientation:', event.detail.orientation);
-    if(event.detail.isOpen === true){
-        //$("#main-container").remove();
+if(APP_ENV === "PRODUCTION") {
+    if (window.devtools.isOpen === true) {
+        $("#main-container").remove();
+        $(".developer-notice").show();
     }
-});
 
-//Test github in other workplace 2021-02-08
+    window.addEventListener('devtoolschange', event => {
+        console.log('Is DevTools open:', event.detail.isOpen);
+        //console.log('DevTools orientation:', event.detail.orientation);
+        if (event.detail.isOpen === true) {
+            $("#main-container").remove();
+            $(".developer-notice").show();
+        }
+    });
+}

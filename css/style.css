@@ -513,8 +513,12 @@ body {
 
 
 /**** Screen width listener*/
-.warning-notice{
+.warning-notice, .developer-notice{
   display: none;
+}
+
+.developer-notice{
+  margin-top: 200px;
 }
 
 .message {
@@ -532,6 +536,17 @@ body {
   width: 100%;
   padding: 0.5em;
 }
+
+.developer-notice header{
+  background: none !important;
+  text-align: center;
+  border-bottom: 1px solid;
+}
+
+.developer-notice header img{
+  width: 300px;
+}
+
 .message i:after {
   font-family: "Font Awesome 5 Free";
   font-weight: 900;
