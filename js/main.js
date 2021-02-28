@@ -82,7 +82,7 @@ function loadOpeningDialog(type) {
                     var dialog_target = getRobotDataByID(target);
                     if(dialog_target != null) {
                         dialog_target = $(".data-box-"+dialog_target.x+"-"+dialog_target.y+" .box_layer");
-                        dialog_target.css({"background-color" : "rgba(222,222,222,0.7)", "z-index" : 10});
+                        dialog_target.css({"background-color" : "rgba(222,222,222,0.7)", "z-index" : 1});
                     }
                 }
             }
@@ -93,7 +93,7 @@ function loadOpeningDialog(type) {
 
     $(".dialog").on("click", function() {
         ckSound();
-        $(".box_layer").css({"background-color":"transparent", "z-index" : "auto"});
+        revertBoxLayer();
         if($(this).attr('data-dialog') === "opening") {
             dialogCount++;
             loadOpeningDialog(type);
@@ -313,7 +313,7 @@ function clickBoxPlayerListener() {
             if (isDoingMove === true && (!$(this).hasClass("available_move"))) {
                 $(".mapbox").removeClass("available_move");
                 $(".mapbox").removeClass("available_attack");
-                $(".box_layer").css("background-color","transparent");
+                revertBoxLayer();
                 $(focusRobot).removeClass("isFocused");
                 focusRobot = null;
                 isDoingMove = false;
@@ -339,7 +339,7 @@ function clickBoxPlayerListener() {
                     $('.available_move').unbind();
                     if (getRobotID($(this)) !== getRobotID(focusRobot)) {
                         $(".mapbox").removeClass("available_move");
-                        $(".box_layer").css("background-color","transparent");
+                        revertBoxLayer();
                         $(".mapbox").removeClass("isFocused");
                     }
                 }
@@ -360,7 +360,7 @@ function clickBoxPlayerListener() {
             if (isDoingMove === true && (!$(this).hasClass("available_move"))) {
                 $(".mapbox").removeClass("available_move");
                 $(".mapbox").removeClass("isFocused");
-                $(".box_layer").css("background-color","transparent");
+                revertBoxLayer();
                 isDoingMove = false;
             }
         });
@@ -428,7 +428,7 @@ function mapViewerListener() {
             //Remove previous hover
             if(isDoingMove === false) {
                 $(".mapbox").removeClass("available_move_ai");
-                $(".box_layer").css("background-color", "transparent");
+                revertBoxLayer();
             }
         });
     }
@@ -449,7 +449,7 @@ function mapViewerListener() {
             //Remove previous hover
             if(isDoingMove === false) {
                 $(".mapbox").removeClass("available_move_third");
-                $(".box_layer").css("background-color", "transparent");
+                revertBoxLayer();
             }
         });
     }
@@ -507,7 +507,7 @@ function showMove(available_pos, target = "player",action = "move"){
                     $("." + canMovePos + ' .box_layer').css("background-color", "#5e8bebb5");
                 } else if(action === "attack"){
                     $("." + canMovePos).addClass("available_attack");
-                    $("." + canMovePos +' .box_layer').css("background-color", "#a21509ba");
+                    $("." + canMovePos +' .box_layer').css({"background-color":"#a21509b3" , "z-index" : "1"});
                 }
             } else if(target === "ai") {
                 $("." + canMovePos).addClass("available_move_ai");
@@ -552,7 +552,7 @@ function robotMoveToNewPoint(movedPosEle,robotEle, target = "player") {
     $(".mapbox").removeClass("available_move"); //clear all available move area
     $(".mapbox").removeClass("available_move_ai");
     $(".mapbox").removeClass("available_move_third");
-    $(".box_layer").css("background-color","transparent");
+    revertBoxLayer();
 
     if(target === "ai"){
         $(robotEle).removeClass("box-is-ai");
@@ -607,7 +607,7 @@ function robotMoveToNewPoint(movedPosEle,robotEle, target = "player") {
                 $("#map").css("filter","none");
                 $(robotEle).removeClass("isFocused");
                 $(".mapbox").removeClass("available_attack");
-                $(".box_layer").css("background-color","transparent");
+                revertBoxLayer();
             });
 
             $('#afterMove_attack').unbind();
@@ -1050,7 +1050,7 @@ function aiAttackAction(robotEle, target = "player",status) {
                     showAttackAnimation(attackerEle,targetEle);
                     setTimeout(function() {
                         $(attackerEle).find(".flashRobot").remove();
-                        $(".box_layer").css("background-color","transparent");
+                        revertBoxLayer();
                         disablePlayerActivity();
                         console.log("ai attack!")
 
@@ -1272,7 +1272,7 @@ function getRobotAttackRange(robot) {
                 setTimeout(function() {
                     $(attackerEle).find(".flashRobot").remove();
                     $(".mapbox").removeClass("available_attack");
-                    $(".box_layer").css("background-color","transparent");
+                    revertBoxLayer();
 
                     ll(targetEle); ll(attackRobotData); ll(attackWeaponIndex);
 
@@ -1282,7 +1282,7 @@ function getRobotAttackRange(robot) {
         } else {
             isDoingAttack = false;
             $(".mapbox").removeClass("available_attack");
-            $(".box_layer").css("background-color","transparent");
+            revertBoxLayer();
             if(isAfterMove === true) {
                 $("#AfterMoveMenu").css({"display": "block"});
             }
@@ -1664,6 +1664,10 @@ function getRobotDataByID(target){
     });
 
     return dialog_target;
+}
+
+function revertBoxLayer() {
+    $(".box_layer").css({"background-color":"transparent", "z-index" : "auto"});
 }
 
 const delay = ms => new Promise(res => setTimeout(res, ms));
